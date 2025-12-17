@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Resources from "./pages/Resources";
+import StudyGroups from "./pages/StudyGroups";
+
 
 const queryClient = new QueryClient();
 
@@ -20,6 +22,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/resources" element={<Resources />} />
+            <Route path="/groups" element={<StudyGroups />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
