@@ -13,7 +13,7 @@ const Header: React.FC = () => {
   const navItems = [
     { id: 'feed', label: 'Feed', icon: Code2 },
     { id: 'chat', label: 'Chat', icon: MessageCircle },
-    { id: 'squads', label: 'Squads', icon: Users },
+    { id: 'Study Groups', label: 'Study Groups', icon: Users },
     { id: 'profile', label: 'Profile', icon: User },
   ];
 
@@ -27,7 +27,7 @@ const Header: React.FC = () => {
           <div className="flex items-center gap-2">
             <Code2 className="h-8 w-8 text-cyan-400" />
             <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-orange-400 bg-clip-text text-transparent">
-              DevConnect
+              LearnHub
             </h1>
           </div>
         </div>

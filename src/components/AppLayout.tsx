@@ -5,7 +5,7 @@ import LandingPage from '@/components/LandingPage';
 import AuthPage from '@/components/AuthPage';
 import FeedPage from '@/components/FeedPage';
 import ChatPage from '@/components/ChatPage';
-import SquadsPage from '@/components/SquadsPage';
+import Study GroupsPage from '@/components/Study GroupsPage';
 import ProfilePage from '@/components/ProfilePage';
 
 const AppLayout: React.FC = () => {
@@ -25,8 +25,8 @@ const AppLayout: React.FC = () => {
         return <FeedPage />;
       case 'chat':
         return <ChatPage />;
-      case 'squads':
-        return <SquadsPage />;
+      case 'Study Groups':
+        return <Study GroupsPage />;
       case 'profile':
         return <ProfilePage />;
       default:

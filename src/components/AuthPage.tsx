@@ -63,7 +63,7 @@ const AuthPage: React.FC = () => {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white transition-colors">
-            Welcome to DevConnect
+            Welcome to LearnHub
           </CardTitle>
           <p className="text-slate-600 dark:text-slate-300 transition-colors">
             Join the developer community

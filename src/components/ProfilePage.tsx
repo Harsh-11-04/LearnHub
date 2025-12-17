@@ -34,7 +34,7 @@ const ProfilePage: React.FC = () => {
 
   const stats = [
     { label: 'Posts', value: '42', icon: Code2 },
-    { label: 'Squads', value: '3', icon: Users },
+    { label: 'Study Groups', value: '3', icon: Users },
     { label: 'Messages', value: '128', icon: MessageCircle },
     { label: 'Stars', value: '256', icon: Star }
   ];
@@ -56,7 +56,7 @@ const ProfilePage: React.FC = () => {
     }
   ];
 
-  const squads = [
+  const Study Groups = [
     {
       id: '1',
       name: 'React UI Library',
@@ -205,7 +205,7 @@ const ProfilePage: React.FC = () => {
       <Tabs defaultValue="posts" className="space-y-4">
         <TabsList>
           <TabsTrigger value="posts">Posts</TabsTrigger>
-          <TabsTrigger value="squads">Squads</TabsTrigger>
+          <TabsTrigger value="Study Groups">Study Groups</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -226,19 +226,19 @@ const ProfilePage: React.FC = () => {
           ))}
         </TabsContent>
 
-        <TabsContent value="squads" className="space-y-4">
-          {squads.map((squad) => (
-            <Card key={squad.id}>
+        <TabsContent value="Study Groups" className="space-y-4">
+          {Study Groups.map((Study Group) => (
+            <Card key={Study Group.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold">{squad.name}</h3>
+                    <h3 className="font-semibold">{Study Group.name}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {squad.role} • {squad.members} members • {squad.project}
+                      {Study Group.role} • {Study Group.members} members • {Study Group.project}
                     </p>
                   </div>
                   <Button variant="outline" size="sm">
-                    View Squad
+                    View Study Group
                   </Button>
                 </div>
               </CardContent>
@@ -258,7 +258,7 @@ const ProfilePage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-medium">Email Notifications</h4>
-                  <p className="text-sm text-muted-foreground">Receive notifications about messages and squad updates</p>
+                  <p className="text-sm text-muted-foreground">Receive notifications about messages and Study Group updates</p>
                 </div>
                 <Button variant="outline" size="sm">Configure</Button>
               </div>

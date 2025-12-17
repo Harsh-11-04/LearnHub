@@ -21,17 +21,17 @@ const LandingPage: React.FC = () => {
       icon: Code2,
       title: 'Developer Feed',
       description:
-        'Share code snippets, project updates, and connect with fellow developers.',
+        'Share code snippets, project updates, and connect with fellow learners.',
     },
     {
       icon: MessageCircle,
       title: 'Real-time Chat',
       description:
-        'Instant messaging with developers worldwide, discuss ideas and collaborate.',
+        'Instant messaging with learners worldwide, discuss ideas and collaborate.',
     },
     {
       icon: Users,
-      title: 'Dev Squads',
+      title: 'Dev Study Groups',
       description:
         'Form teams, work on open-source projects, and build amazing things together.',
     },
@@ -56,11 +56,11 @@ return (
         </div>
 
         <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-cyan-500 via-orange-400 to-amber-400 bg-clip-text text-transparent">
-          DevConnect
+          LearnHub
         </h1>
 
         <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-8 max-w-3xl mx-auto transition-colors">
-          The ultimate collaboration platform for developers. Share updates, chat live, and form squads to build the next big thing.
+          The ultimate collaboration platform for learners. Share updates, chat live, and form Study Groups to build the next big thing.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -115,10 +115,10 @@ return (
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            { label: 'Active Developers', value: '10K+' },
+            { label: 'Active learners', value: '10K+' },
             { label: 'Projects Created', value: '2.5K+' },
             { label: 'Messages Sent', value: '500K+' },
-            { label: 'Squads Formed', value: '1.2K+' },
+            { label: 'Study Groups Formed', value: '1.2K+' },
           ].map((stat, index) => (
             <div key={index}>
               <div className="text-3xl font-bold text-transparent bg-gradient-to-r from-cyan-500 to-orange-400 bg-clip-text mb-2">

@@ -19,7 +19,7 @@ import {
   Code2
 } from 'lucide-react';
 
-interface Squad {
+interface Study Group {
   id: string;
   name: string;
   description: string;
@@ -38,18 +38,18 @@ interface Squad {
   };
 }
 
-const SquadsPage: React.FC = () => {
+const Study GroupsPage: React.FC = () => {
   const { user } = useAppContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [newSquad, setNewSquad] = useState({
+  const [newStudy Group, setNewStudy Group] = useState({
     name: '',
     description: '',
     techStack: '',
     project: ''
   });
 
-  const [squads, setSquads] = useState<Squad[]>([
+  const [Study Groups, setStudy Groups] = useState<Study Group[]>([
     {
       id: '1',
       name: 'React UI Library',
@@ -60,7 +60,7 @@ const SquadsPage: React.FC = () => {
       isJoined: true,
       project: {
         name: 'ui-components',
-        repo: 'github.com/squad/ui-components',
+        repo: 'github.com/Study Group/ui-components',
         stars: 128
       },
       leader: {
@@ -78,7 +78,7 @@ const SquadsPage: React.FC = () => {
       isJoined: false,
       project: {
         name: 'smart-chatbot',
-        repo: 'github.com/squad/smart-chatbot',
+        repo: 'github.com/Study Group/smart-chatbot',
         stars: 89
       },
       leader: {
@@ -96,7 +96,7 @@ const SquadsPage: React.FC = () => {
       isJoined: false,
       project: {
         name: 'devops-toolkit',
-        repo: 'github.com/squad/devops-toolkit',
+        repo: 'github.com/Study Group/devops-toolkit',
         stars: 45
       },
       leader: {
@@ -106,27 +106,27 @@ const SquadsPage: React.FC = () => {
     }
   ]);
 
-  const handleJoinSquad = (squadId: string) => {
-    setSquads(squads.map(squad => 
-      squad.id === squadId 
-        ? { ...squad, isJoined: !squad.isJoined, members: squad.isJoined ? squad.members - 1 : squad.members + 1 }
-        : squad
+  const handleJoinStudy Group = (Study GroupId: string) => {
+    setStudy Groups(Study Groups.map(Study Group => 
+      Study Group.id === Study GroupId 
+        ? { ...Study Group, isJoined: !Study Group.isJoined, members: Study Group.isJoined ? Study Group.members - 1 : Study Group.members + 1 }
+        : Study Group
     ));
   };
 
-  const handleCreateSquad = () => {
-    if (!newSquad.name || !newSquad.description) return;
+  const handleCreateStudy Group = () => {
+    if (!newStudy Group.name || !newStudy Group.description) return;
 
-    const squad: Squad = {
+    const Study Group: Study Group = {
       id: Date.now().toString(),
-      name: newSquad.name,
-      description: newSquad.description,
-      techStack: newSquad.techStack.split(',').map(t => t.trim()).filter(t => t),
+      name: newStudy Group.name,
+      description: newStudy Group.description,
+      techStack: newStudy Group.techStack.split(',').map(t => t.trim()).filter(t => t),
       members: 1,
       maxMembers: 6,
       isJoined: true,
       project: {
-        name: newSquad.project || newSquad.name.toLowerCase().replace(/\s+/g, '-'),
+        name: newStudy Group.project || newStudy Group.name.toLowerCase().replace(/\s+/g, '-'),
         repo: `github.com/${user?.name.toLowerCase()}/project`,
         stars: 0
       },
@@ -136,15 +136,15 @@ const SquadsPage: React.FC = () => {
       }
     };
 
-    setSquads([squad, ...squads]);
-    setNewSquad({ name: '', description: '', techStack: '', project: '' });
+    setStudy Groups([Study Group, ...Study Groups]);
+    setNewStudy Group({ name: '', description: '', techStack: '', project: '' });
     setShowCreateDialog(false);
   };
 
-  const filteredSquads = squads.filter(squad =>
-    squad.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    squad.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    squad.techStack.some(tech => tech.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredStudy Groups = Study Groups.filter(Study Group =>
+    Study Group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    Study Group.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    Study Group.techStack.some(tech => tech.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -152,46 +152,46 @@ const SquadsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Dev Squads</h1>
-          <p className="text-muted-foreground">Join or create squads to collaborate on open-source projects</p>
+          <h1 className="text-3xl font-bold">Dev Study Groups</h1>
+          <p className="text-muted-foreground">Join or create Study Groups to collaborate on open-source projects</p>
         </div>
         
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
             <Button className="gap-2">
               <Plus className="h-4 w-4" />
-              Create Squad
+              Create Study Group
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Squad</DialogTitle>
+              <DialogTitle>Create New Study Group</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="squad-name">Squad Name</Label>
+                <Label htmlFor="Study Group-name">Study Group Name</Label>
                 <Input
-                  id="squad-name"
-                  value={newSquad.name}
-                  onChange={(e) => setNewSquad({ ...newSquad, name: e.target.value })}
+                  id="Study Group-name"
+                  value={newStudy Group.name}
+                  onChange={(e) => setNewStudy Group({ ...newStudy Group, name: e.target.value })}
                   placeholder="React UI Library"
                 />
               </div>
               <div>
-                <Label htmlFor="squad-description">Description</Label>
+                <Label htmlFor="Study Group-description">Description</Label>
                 <Textarea
-                  id="squad-description"
-                  value={newSquad.description}
-                  onChange={(e) => setNewSquad({ ...newSquad, description: e.target.value })}
-                  placeholder="What will your squad work on?"
+                  id="Study Group-description"
+                  value={newStudy Group.description}
+                  onChange={(e) => setNewStudy Group({ ...newStudy Group, description: e.target.value })}
+                  placeholder="What will your Study Group work on?"
                 />
               </div>
               <div>
                 <Label htmlFor="tech-stack">Tech Stack (comma separated)</Label>
                 <Input
                   id="tech-stack"
-                  value={newSquad.techStack}
-                  onChange={(e) => setNewSquad({ ...newSquad, techStack: e.target.value })}
+                  value={newStudy Group.techStack}
+                  onChange={(e) => setNewStudy Group({ ...newStudy Group, techStack: e.target.value })}
                   placeholder="React, TypeScript, Node.js"
                 />
               </div>
@@ -199,14 +199,14 @@ const SquadsPage: React.FC = () => {
                 <Label htmlFor="project-name">Project Name (optional)</Label>
                 <Input
                   id="project-name"
-                  value={newSquad.project}
-                  onChange={(e) => setNewSquad({ ...newSquad, project: e.target.value })}
+                  value={newStudy Group.project}
+                  onChange={(e) => setNewStudy Group({ ...newStudy Group, project: e.target.value })}
                   placeholder="my-awesome-project"
                 />
               </div>
               <div className="flex gap-2 pt-4">
-                <Button onClick={handleCreateSquad} className="flex-1">
-                  Create Squad
+                <Button onClick={handleCreateStudy Group} className="flex-1">
+                  Create Study Group
                 </Button>
                 <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
                   Cancel
@@ -221,35 +221,35 @@ const SquadsPage: React.FC = () => {
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search squads by name, description, or tech..."
+          placeholder="Search Study Groups by name, description, or tech..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9"
         />
       </div>
 
-      {/* Squads Grid */}
+      {/* Study Groups Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredSquads.map((squad) => (
-          <Card key={squad.id} className="hover:shadow-lg transition-shadow border-slate-700/50 hover:border-cyan-500/50 bg-slate-800/30 backdrop-blur">
+        {filteredStudy Groups.map((Study Group) => (
+          <Card key={Study Group.id} className="hover:shadow-lg transition-shadow border-slate-700/50 hover:border-cyan-500/50 bg-slate-800/30 backdrop-blur">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <CardTitle className="text-lg mb-2">{squad.name}</CardTitle>
+                  <CardTitle className="text-lg mb-2">{Study Group.name}</CardTitle>
                   <p className="text-sm text-muted-foreground line-clamp-2">
-                    {squad.description}
+                    {Study Group.description}
                   </p>
                 </div>
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={squad.leader.avatar} />
-                  <AvatarFallback>{squad.leader.name.charAt(0)}</AvatarFallback>
+                  <AvatarImage src={Study Group.leader.avatar} />
+                  <AvatarFallback>{Study Group.leader.name.charAt(0)}</AvatarFallback>
                 </Avatar>
               </div>
             </CardHeader>
             
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-1">
-                {squad.techStack.map((tech) => (
+                {Study Group.techStack.map((tech) => (
                   <Badge key={tech} variant="secondary" className="text-xs">
                     {tech}
                   </Badge>
@@ -259,17 +259,17 @@ const SquadsPage: React.FC = () => {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <Github className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground truncate">{squad.project.repo}</span>
+                  <span className="text-muted-foreground truncate">{Study Group.project.repo}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4 text-muted-foreground" />
-                      <span>{squad.members}/{squad.maxMembers}</span>
+                      <span>{Study Group.members}/{Study Group.maxMembers}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 text-muted-foreground" />
-                      <span>{squad.project.stars}</span>
+                      <span>{Study Group.project.stars}</span>
                     </div>
                   </div>
                 </div>
@@ -277,15 +277,15 @@ const SquadsPage: React.FC = () => {
               
               <div className="flex gap-2">
                 <Button
-                  variant={squad.isJoined ? "outline" : "default"}
+                  variant={Study Group.isJoined ? "outline" : "default"}
                   size="sm"
-                  onClick={() => handleJoinSquad(squad.id)}
+                  onClick={() => handleJoinStudy Group(Study Group.id)}
                   className="flex-1"
-                  disabled={!squad.isJoined && squad.members >= squad.maxMembers}
+                  disabled={!Study Group.isJoined && Study Group.members >= Study Group.maxMembers}
                 >
-                  {squad.isJoined ? 'Leave' : squad.members >= squad.maxMembers ? 'Full' : 'Join'}
+                  {Study Group.isJoined ? 'Leave' : Study Group.members >= Study Group.maxMembers ? 'Full' : 'Join'}
                 </Button>
-                {squad.isJoined && (
+                {Study Group.isJoined && (
                   <Button variant="ghost" size="sm">
                     <MessageCircle className="h-4 w-4" />
                   </Button>
@@ -296,15 +296,15 @@ const SquadsPage: React.FC = () => {
         ))}
       </div>
 
-      {filteredSquads.length === 0 && (
+      {filteredStudy Groups.length === 0 && (
         <div className="text-center py-12">
           <Code2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No squads found</h3>
-          <p className="text-muted-foreground">Try adjusting your search or create a new squad</p>
+          <h3 className="text-lg font-semibold mb-2">No Study Groups found</h3>
+          <p className="text-muted-foreground">Try adjusting your search or create a new Study Group</p>
         </div>
       )}
     </div>
   );
 };
 
-export default SquadsPage;
+export default Study GroupsPage;

@@ -44,7 +44,7 @@ const ChatPage: React.FC = () => {
     },
     {
       id: '2',
-      name: 'Dev Squad Alpha',
+      name: 'Dev Study Group Alpha',
       avatar: 'https://github.com/shadcn.png',
       lastMessage: 'Mike: When should we deploy?',
       timestamp: '1h ago',
