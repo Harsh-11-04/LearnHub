@@ -1,77 +1,102 @@
-DevConnect 💬🚀
-# 💬 DevConnect – Real-Time Developer Collaboration Platform
+# 🎓 LearnHub — Peer-to-Peer Learning & Resource Sharing Platform
 
-![Next.js](https://img.shields.io/badge/Next.js-000?logo=nextdotjs)
-![Node.js](https://img.shields.io/badge/Node.js-339933?logo=nodedotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-06B6D4?logo=tailwindcss)
-![License](https://img.shields.io/badge/License-MIT-blue)
 
-> A full-stack real-time platform for developers to post, chat, and form squads to collaborate on open-source issues. 🚀
+> A peer-to-peer learning platform where students share resources, collaborate in study groups, and support each other academically. 📚
 
 ---
-Live link: https://dev-connect-rose.vercel.app/
-## 📸 Preview
 
-<img width="1329" height="786" alt="Screenshot 2025-08-06 135336" src="https://github.com/user-attachments/assets/18cb6a1a-ba42-49a3-8e58-88543507a935" />
-<img width="1322" height="782" alt="Screenshot 2025-08-06 135414" src="https://github.com/user-attachments/assets/b44ed80f-1d7f-4f37-824d-65cbee458f41" />
-<img width="1324" height="779" alt="Screenshot 2025-08-06 135613" src="https://github.com/user-attachments/assets/e7013ffd-bf46-41c0-b2ef-93dd30eddb56" />
-<img width="1325" height="773" alt="Screenshot 2025-08-06 135637" src="https://github.com/user-attachments/assets/b8dfca18-f798-40d8-8be2-05413ff653fe" />
-<img width="1266" height="756" alt="Screenshot 2025-08-06 135743" src="https://github.com/user-attachments/assets/d192c0aa-9b4c-45b7-a0dc-bbc709570c13" />
-<img width="1337" height="786" alt="Screenshot 2025-08-06 135753" src="https://github.com/user-attachments/assets/1eea962f-282f-450d-a873-b029aa18df0d" />
-<img width="1325" height="788" alt="Screenshot 2025-08-06 135914" src="https://github.com/user-attachments/assets/38d0f0d4-57b9-47e9-ad5d-ce4566db67a8" />
+## 📘 Project Overview
+**LearnHub** is a peer-to-peer learning and resource sharing platform built as an academic project. It focuses on collaborative learning by allowing users to share study materials, organize resources by subject, and participate in community-driven learning activities.
 
+The project emphasizes clean architecture, reusable components, and strong TypeScript domain models, and is designed to be extendable with backend services in the future.
 
+---
 
+## 🎯 Objectives
+- Enable students to share learning resources (notes, PDFs, videos, links)
+- Organize resources by subject and tags
+- Encourage peer participation through ratings and contributions
+- Provide a scalable foundation for study groups and Q&A discussions
 
 ---
 
 ## ✨ Features
 
-- 🔐 Firebase Auth (Google/Email Login)
-- 📝 Post Feed with markdown, tags, likes, comments
-- 💬 Real-time Chat with Socket.io
-- 👥 Squad creation, joining, and group collaboration
-- 🔍 Explore developers by tech stack or university
-- 🛎️ Notifications for squad invites, messages, and post replies
-- 📊 Dashboard showing activity stats
-- 🌗 Fully responsive + Dark mode supported
+### ✅ Implemented
+- Resource upload and shared resource feed
+- Subject-based categorization and tagging
+- 1–5 star rating system for resources
+- Responsive and accessible UI using Tailwind CSS
+- Centralized TypeScript domain models (`src/types/learning.ts`)
+
+### 🛠️ Planned / Future Scope
+- Study groups / learning circles
+- Q&A discussion forum
+- Contribution points, badges, and leaderboard
+- User profiles with learning interests
+- Backend integration (authentication, database, file storage)
 
 ---
 
 ## 🛠️ Tech Stack
 
-**Frontend:**
-- [Next.js](https://nextjs.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [shadcn/ui](https://ui.shadcn.com/)
-- [Framer Motion](https://www.framer.com/motion/)
+### Frontend
+- **Framework:** React + TypeScript (Vite)
+- **Styling:** Tailwind CSS, shadcn/ui
+- **Routing:** React Router
+- **State Management:** React Hooks
 
-**Backend:**
-- [Node.js](https://nodejs.org/)
-- [Express.js](https://expressjs.com/)
-- [MongoDB + Mongoose](https://mongoosejs.com/)
-- [Socket.io](https://socket.io/)
-- [Firebase Auth](https://firebase.google.com/)
-- [JWT](https://jwt.io/)
-- [PM2](https://pm2.keymetrics.io/) for backend clustering
+### Version Control
+- Git & GitHub
 
 ---
-🚀 Optimizations
-PM2 clustering for backend scalability
 
-Indexed MongoDB queries for faster API responses
+## 📁 Project Structure
+```
+src/
+ ├── components/     # Reusable UI components
+ ├── pages/          # Application pages
+ ├── types/          # TypeScript domain models (learning.ts)
+ ├── hooks/          # Custom hooks
+ ├── contexts/       # Global state/context
+ ├── App.tsx
+ └── main.tsx
+```
 
-Redis caching (optional)
+---
 
-Lazy loading and debounced search inputs
+## 🧪 How to Run the Project
+```bash
+npm install
+npm run dev
+```
 
-📈 Stats
-✅ 1000+ users onboarded in 3 weeks
+The application runs locally using Vite.
 
-👥 300+ daily active developers
+---
 
-🧠 Collaborations from 4 universities
+## 🎓 Academic Relevance
+This project demonstrates:
+- Component-based frontend architecture
+- Strong use of TypeScript interfaces and type safety
+- Separation of concerns and scalable project structure
+- Practical application of peer-to-peer learning concepts
 
-⏱️ API latency improved by 40% using indexing and backend clustering
+---
 
+## 📌 Notes
+- The repository was kept **private during development** and can be made public for evaluation.
+- Backend features mentioned are part of **future scope** and not required for the current academic submission.
 
+---
+
+## 👤 Author
+**Harsh Pawar**  
+Peer-to-Peer Learning Platform (Academic Project)
+
+---
+
+*Made with ❤️ for collaborative learning*
