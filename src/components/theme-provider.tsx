@@ -2,9 +2,15 @@
 
 import * as React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
-import { ThemeProviderProps } from "next-themes/dist/types"
 
 type Theme = "dark" | "light" | "system"
+
+type ThemeProviderProps = {
+  children: React.ReactNode
+  defaultTheme?: Theme
+  storageKey?: string
+  value?: any
+} & React.ComponentProps<"div">
 
 type ThemeContextType = {
   theme: Theme
@@ -18,7 +24,7 @@ export function ThemeProvider({
   defaultTheme = "system",
   value: _value,
   ...props
-}: ThemeProviderProps) {
+}: any) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== "undefined") {
       const savedTheme = localStorage.getItem("theme")

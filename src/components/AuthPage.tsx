@@ -1,53 +1,89 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppContext } from '@/contexts/AppContext';
-import { Code2, Github, ArrowLeft } from 'lucide-react';
+import { Code2, Github, ArrowLeft, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const AuthPage: React.FC = () => {
-  const { setUser, setCurrentPage } = useAppContext();
+  const { login, register, loginWithGithub, isAuthenticated } = useAppContext();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
 
-  const handleGoogleAuth = () => {
-    const mockUser = {
-      id: '1',
-      name: 'Tanvi Ganotra',
-      email: 'tanvi123@example.com',
-      avatar: 'https://github.com/shadcn.png',
-      techStack: ['React', 'Bootstrap', 'TailwindCSS'],
-    };
-    setUser(mockUser);
-    setCurrentPage('feed');
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleGithubAuth = async () => {
+    try {
+      await loginWithGithub();
+      navigate('/dashboard');
+    } catch (error) {
+      console.error(error);
+      alert("GitHub login failed");
+    }
   };
 
-  const handleEmailAuth = (isSignUp: boolean) => {
+  const handleAdminLogin = async () => {
+    try {
+      // Admin credentials for Supabase
+      await login('admin@learnhub.dev', 'LearnHub@Admin2024');
+      navigate('/admin');
+    } catch (error: any) {
+      console.error('Admin login failed:', error);
+      // Show error message
+      if (error.message?.includes('Invalid login credentials')) {
+        alert('❌ Admin account not set up yet. Please run the migration-admin-setup.sql in Supabase first.');
+      } else {
+        alert(`❌ Admin login failed: ${error.message || 'Unknown error'}`);
+      }
+    }
+  };
+
+  const handleEmailAuth = async (isSignUp: boolean) => {
     if (!email || !password || (isSignUp && !name)) return;
 
-    const mockUser = {
-      id: '1',
-      name: isSignUp ? name : 'Tanvi Ganotra',
-      email,
-      avatar: 'https://github.com/TanviGanotra30',
-      techStack: ['React', 'Bootstrap', 'TailwindCSS'],
-    };
-    setUser(mockUser);
-    setCurrentPage('feed');
+    try {
+      if (isSignUp) {
+        await register(name, email, password);
+        // If we get here, registration was successful
+        console.log('✅ Registration successful');
+        navigate('/dashboard');
+      } else {
+        await login(email, password);
+        console.log('✅ Login successful');
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      console.error('Auth error:', err);
+
+      // Check if it's the email confirmation error we throw
+      if (err.message?.includes('check your email')) {
+        alert('✅ Account created! Please check your email to confirm your account before logging in.');
+      } else {
+        // Show the actual error message from Supabase
+        const errorMessage = err.message || 'Authentication failed. Please check your credentials.';
+        alert(`❌ ${errorMessage}`);
+      }
+    }
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center transition-colors duration-700 bg-gradient-to-br from-slate-100 via-slate-200 to-cyan-100 dark:from-slate-900 dark:via-slate-800 dark:to-cyan-900 p-4">
+    <div className="relative min-h-screen flex items-center justify-center transition-colors duration-700 p-4">
 
       {/* Back to Home Button (Top-Left Corner) */}
       <div className="absolute top-6 left-6">
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setCurrentPage('landing')}
+          onClick={() => navigate('/')}
           className="flex items-center gap-2 border-slate-400 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-all"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -84,7 +120,7 @@ const AuthPage: React.FC = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="tanvi123@example.com"
+                  placeholder="harshpawar@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -112,7 +148,7 @@ const AuthPage: React.FC = () => {
                 <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
-                  placeholder="Tanvi Ganotra"
+                  placeholder="Harsh Pawar"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
@@ -122,7 +158,7 @@ const AuthPage: React.FC = () => {
                 <Input
                   id="signup-email"
                   type="email"
-                  placeholder="tanvi123@example.com"
+                  placeholder="harshpawar@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -157,14 +193,26 @@ const AuthPage: React.FC = () => {
             </div>
           </div>
 
-          <Button
-            variant="outline"
-            className="w-full gap-2 border-slate-400 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors"
-            onClick={handleGoogleAuth}
-          >
-            <Github className="h-4 w-4" />
-            Continue with GitHub
-          </Button>
+          <div className="space-y-3">
+            <Button
+              variant="outline"
+              className="w-full gap-2 border-slate-400 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors"
+              onClick={handleGithubAuth}
+            >
+              <Github className="h-4 w-4" />
+              Continue with GitHub
+            </Button>
+
+            {/* Admin Login Button */}
+            <Button
+              variant="outline"
+              className="w-full gap-2 border-purple-400 dark:border-purple-600 text-purple-700 dark:text-purple-300 hover:bg-purple-100/50 dark:hover:bg-purple-900/30 transition-colors"
+              onClick={handleAdminLogin}
+            >
+              <Shield className="h-4 w-4" />
+              Login as Admin
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

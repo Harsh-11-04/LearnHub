@@ -1,75 +1,289 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { useAppContext } from '@/contexts/AppContext';
-import { Moon, Sun, Menu, Code2, Users, MessageCircle, User } from 'lucide-react';
-import { useTheme } from '@/components/theme-provider';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { useAppContext } from "@/contexts/AppContext";
+import { useTheme } from "@/components/theme-provider";
+import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  BookOpen,
+  Users,
+  MessageSquare,
+  HelpCircle,
+  User,
+  Sun,
+  Moon,
+  Sparkles,
+  Home,
+  Settings,
+  LogOut,
+  Menu,
+  Code,
+  UsersRound,
+  Library,
+  Shield,
+  Bell,
+  Activity,
+} from "lucide-react";
 
 const Header: React.FC = () => {
-  const { user, currentPage, setCurrentPage, toggleSidebar, isAuthenticated } = useAppContext();
+  const { user, isAuthenticated, logout } = useAppContext();
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { id: 'feed', label: 'Feed', icon: Code2 },
-    { id: 'chat', label: 'Chat', icon: MessageCircle },
-    { id: 'Study Groups', label: 'Study Groups', icon: Users },
-    { id: 'profile', label: 'Profile', icon: User },
+    { id: "dashboard", path: "/dashboard", label: "Dashboard", icon: Home },
+    { id: "feed", path: "/feed", label: "Feed", icon: MessageSquare },
+    { id: "peers", path: "/peers", label: "Peers", icon: UsersRound },
+    { id: "code", path: "/code", label: "Code", icon: Code },
+    { id: "resources", path: "/resources", label: "Resources", icon: Library },
+    { id: "groups", path: "/groups", label: "Groups", icon: Users },
+    { id: "qa", path: "/qa", label: "Q&A", icon: HelpCircle },
   ];
 
   return (
-    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="fixed top-0 w-full z-50 border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="md:hidden">
-            <Menu className="h-5 w-5" />
-          </Button>
-          <div className="flex items-center gap-2">
-            <Code2 className="h-8 w-8 text-cyan-400" />
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-orange-400 bg-clip-text text-transparent">
-              LearnHub
-            </h1>
+        <motion.div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => navigate("/dashboard")}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <div className="p-1.5 rounded-lg bg-gradient-to-br from-cyan-500/20 to-orange-400/20">
+            <Sparkles className="h-5 w-5 text-cyan-500" />
           </div>
-        </div>
+          <span className="text-xl font-bold bg-gradient-to-r from-cyan-600 to-orange-500 bg-clip-text text-transparent">
+            LearnHub
+          </span>
+        </motion.div>
 
         {isAuthenticated && (
-          <nav className="hidden md:flex items-center gap-2">
-            {navItems.map(({ id, label, icon: Icon }) => (
-              <Button
-                key={id}
-                variant={currentPage === id ? "default" : "ghost"}
-                onClick={() => setCurrentPage(id)}
-                className="gap-2"
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </Button>
-            ))}
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map(({ path, label, icon: Icon }) => {
+              const isActive = location.pathname === path;
+              return (
+                <motion.button
+                  key={path}
+                  onClick={() => navigate(path)}
+                  className={`
+                    relative px-4 py-2 rounded-full text-sm font-medium transition-colors
+                    ${isActive ? "text-cyan-600 dark:text-cyan-400" : "text-muted-foreground hover:text-foreground"}
+                  `}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute inset-0 bg-cyan-100 dark:bg-cyan-900/30 rounded-full"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Icon className="h-4 w-4" />
+                    {label}
+                  </span>
+                </motion.button>
+              );
+            })}
           </nav>
         )}
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          >
-            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </Button>
-          
-          {isAuthenticated && user ? (
-            <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="https://media.istockphoto.com/id/1186723101/photo/digital-3d-illustration-of-a-toon-girl.webp?a=1&b=1&s=612x612&w=0&k=20&c=rIBUz9p3Tr60ncI26uuu1N-qxwbKEs5_kEgWmJGMX0U=" />
-                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <span className="hidden sm:block font-medium">{user.name}</span>
-            </div>
-          ) : (
-            <Button onClick={() => setCurrentPage('auth')} className="gap-2">
-              <User className="h-4 w-4" />
-              Sign In
+          {/* Mobile Menu Button */}
+          {isAuthenticated && (
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[280px]">
+                <SheetHeader>
+                  <SheetTitle className="text-left">Navigation</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-2 mt-6">
+                  {navItems.map(({ path, label, icon: Icon }) => {
+                    const isActive = location.pathname === path;
+                    return (
+                      <Button
+                        key={path}
+                        variant={isActive ? "default" : "ghost"}
+                        className="justify-start gap-3"
+                        onClick={() => {
+                          navigate(path);
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        <Icon className="h-5 w-5" />
+                        {label}
+                      </Button>
+                    );
+                  })}
+                  <div className="border-t my-2" />
+                  <Button
+                    variant="ghost"
+                    className="justify-start gap-3"
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  >
+                    {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                    {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="justify-start gap-3 text-primary"
+                    onClick={() => {
+                      navigate('/admin');
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <Shield className="h-5 w-5" />
+                    Admin Portal
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="justify-start gap-3"
+                    onClick={() => {
+                      navigate('/profile');
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <User className="h-5 w-5" />
+                    Profile
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="justify-start gap-3 text-destructive hover:text-destructive"
+                    onClick={() => {
+                      logout();
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <LogOut className="h-5 w-5" />
+                    Log out
+                  </Button>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          )}
+
+          <motion.div whileHover={{ rotate: 15 }} whileTap={{ scale: 0.9 }}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="rounded-full"
+            >
+              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
+          </motion.div>
+
+          {/* Activity */}
+          {isAuthenticated && (
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/activity')}
+                className="rounded-full"
+              >
+                <Activity className="h-5 w-5" />
+              </Button>
+            </motion.div>
+          )}
+
+          {/* Notifications */}
+          {isAuthenticated && (
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/notifications')}
+                className="rounded-full"
+              >
+                <Bell className="h-5 w-5" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              </Button>
+            </motion.div>
+          )}
+
+          {/* Settings */}
+          {isAuthenticated && (
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/settings')}
+                className="rounded-full"
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+            </motion.div>
+          )}
+
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                  <Avatar className="cursor-pointer border-2 border-transparent hover:border-cyan-500 transition-all">
+                    <AvatarImage src={user.avatar} />
+                    <AvatarFallback>{user.name?.charAt(0) || 'U'}</AvatarFallback>
+                  </Avatar>
+                </motion.div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                  <Home className="mr-2 h-4 w-4" />
+                  <span>Dashboard</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/settings')}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/notifications')}>
+                  <Bell className="mr-2 h-4 w-4" />
+                  <span>Notifications</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/activity')}>
+                  <Activity className="mr-2 h-4 w-4" />
+                  <span>Activity</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => logout()}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>

@@ -53,7 +53,7 @@ const Index = () => {
   );
 };
 
-const FeatureCard = ({ icon: Icon, title, description }: any) => (
+const FeatureCard = ({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string; }) => (
   <div className="p-6 rounded-lg border bg-card hover:shadow-lg transition-all">
     <Icon className="w-12 h-12 text-primary mb-4" />
     <h3 className="text-xl font-semibold mb-2">{title}</h3>

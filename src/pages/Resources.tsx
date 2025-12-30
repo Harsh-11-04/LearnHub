@@ -1,14 +1,66 @@
-import { useState } from "react";
-import { Resource, RESOURCE_TYPES, SUBJECTS } from "@/types/learning";
+import { useState, useEffect, useRef } from "react";
+import { RESOURCE_TYPES, SUBJECTS } from "@/types/learning";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import PageTransition from "@/components/PageTransition";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Download,
+  ExternalLink,
+  FileText,
+  Sparkles,
+  Upload,
+  X,
+  File,
+  Image,
+  FileArchive,
+  Share2,
+  Check,
+  Copy,
+  Link2
+} from "lucide-react";
+import { toast } from "sonner";
+import { resourcesService, ResourceItem } from "@/services/resources.service";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const getFileIcon = (fileType?: string) => {
+  if (!fileType) return <FileText className="h-5 w-5 text-purple-500" />;
+  if (fileType.startsWith('image/')) return <Image className="h-5 w-5 text-green-500" />;
+  if (fileType.includes('pdf')) return <FileText className="h-5 w-5 text-red-500" />;
+  if (fileType.includes('zip') || fileType.includes('rar')) return <FileArchive className="h-5 w-5 text-yellow-500" />;
+  return <File className="h-5 w-5 text-blue-500" />;
+};
 
 const Resources = () => {
-  const [resources, setResources] = useState<Resource[]>([]);
+  const [resources, setResources] = useState<ResourceItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareResource, setShareResource] = useState<ResourceItem | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [justUploaded, setJustUploaded] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     title: "",
@@ -18,49 +70,333 @@ const Resources = () => {
     link: "",
   });
 
-  const addResource = () => {
-    if (!form.title || !form.subject) return;
-
-    const newResource: Resource = {
-      id: Date.now().toString(),
-      title: form.title,
-      description: form.description,
-      subject: form.subject,
-      type: form.type as any,
-      link: form.link,
-      tags: [],
-      uploaded_by: "demo-user",
-      uploader_name: "Student",
-      upload_date: new Date().toISOString(),
-      views: 0,
-      downloads: 0,
-      average_rating: 0,
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await resourcesService.getAll();
+        setResources(data);
+      } catch (error) {
+        console.error(error);
+        // Don't show error in mock mode
+      } finally {
+        setLoading(false);
+      }
     };
+    load();
+  }, []);
 
-    setResources([newResource, ...resources]);
-    setForm({ title: "", description: "", subject: "", type: "notes", link: "" });
+  const handleFileSelect = (file: File) => {
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("File too large. Maximum size is 50MB");
+      return;
+    }
+    setSelectedFile(file);
+    if (!form.title) {
+      const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+      setForm({ ...form, title: nameWithoutExt });
+    }
   };
 
-  const rateResource = (id: string, rating: number) => {
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileSelect(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileSelect(e.target.files[0]);
+    }
+  };
+
+  const removeSelectedFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const openShareDialog = (resource: ResourceItem) => {
+    setShareResource(resource);
+    setShareDialogOpen(true);
+    setCopied(false);
+  };
+
+  const copyShareLink = async () => {
+    if (shareResource) {
+      await resourcesService.copyShareLink(shareResource);
+      setCopied(true);
+      toast.success("Link copied to clipboard!");
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const addResource = async () => {
+    if (!form.title || !form.subject) {
+      toast.error("Please fill in title and subject");
+      return;
+    }
+
+    if (!selectedFile && !form.link) {
+      toast.error("Please upload a file or provide a link");
+      return;
+    }
+
+    setUploading(true);
+    setProgress(0);
+
+    try {
+      let fileData = null;
+
+      if (selectedFile) {
+        fileData = await resourcesService.uploadFile(selectedFile, (prog) => {
+          setProgress(prog);
+        });
+      }
+
+      const newResource = await resourcesService.create({
+        title: form.title,
+        description: form.description,
+        subject: form.subject,
+        type: form.type,
+        link: form.link,
+        ...(fileData && {
+          fileUrl: fileData.fileUrl,
+          fileName: fileData.fileName,
+          fileSize: fileData.fileSize,
+          fileType: fileData.fileType,
+        }),
+      });
+
+      setResources([newResource, ...resources]);
+      setForm({ title: "", description: "", subject: "", type: "notes", link: "" });
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      // Mark as just uploaded and show share dialog
+      setJustUploaded(newResource.id);
+      setShareResource(newResource);
+      setShareDialogOpen(true);
+
+      toast.success("Resource shared successfully!");
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e.message || "Failed to share resource");
+    } finally {
+      setUploading(false);
+      setProgress(0);
+    }
+  };
+
+  const handleDownload = async (resource: ResourceItem) => {
+    if (resource.fileUrl) {
+      try {
+        const data = await resourcesService.triggerDownload(resource.id);
+        setResources((prev) =>
+          prev.map((r) => (r.id === resource.id ? { ...r, downloads: data.downloads } : r))
+        );
+        toast.success("Download started!");
+      } catch (error) {
+        toast.error("Failed to download file");
+      }
+    } else if (resource.link) {
+      window.open(resource.link, "_blank");
+    }
+  };
+
+  const rateResource = async (id: string, rating: number) => {
     setResources((prev) =>
       prev.map((r) => (r.id === id ? { ...r, average_rating: rating } : r))
     );
+    await resourcesService.rate(id, rating);
   };
 
   return (
-    <div className="container mx-auto px-4 py-10 space-y-10">
+    <PageTransition className="container mx-auto px-4 py-10 space-y-10 max-w-5xl">
+      {/* Share Dialog */}
+      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="h-5 w-5 text-purple-500" />
+              {justUploaded === shareResource?.id ? "Resource Uploaded!" : "Share Resource"}
+            </DialogTitle>
+            <DialogDescription>
+              {justUploaded === shareResource?.id
+                ? "Your resource has been shared successfully. Copy the link below to share it with others."
+                : "Share this resource with your peers."
+              }
+            </DialogDescription>
+          </DialogHeader>
+
+          {shareResource && (
+            <div className="space-y-4">
+              {/* Resource Preview */}
+              <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
+                {getFileIcon(shareResource.fileType)}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{shareResource.title}</p>
+                  <p className="text-sm text-muted-foreground">{shareResource.subject}</p>
+                </div>
+              </div>
+
+              {/* Share Link */}
+              <div className="flex items-center gap-2">
+                <div className="flex-1 flex items-center gap-2 p-3 bg-muted rounded-lg">
+                  <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="text-sm truncate">
+                    {resourcesService.getShareUrl(shareResource)}
+                  </span>
+                </div>
+                <Button
+                  onClick={copyShareLink}
+                  variant="default"
+                  className="shrink-0 bg-purple-600 hover:bg-purple-700"
+                >
+                  {copied ? (
+                    <><Check className="h-4 w-4 mr-2" /> Copied!</>
+                  ) : (
+                    <><Copy className="h-4 w-4 mr-2" /> Copy</>
+                  )}
+                </Button>
+              </div>
+
+              {/* Quick Share Buttons */}
+              <div className="flex gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    const url = resourcesService.getShareUrl(shareResource);
+                    window.open(`https://wa.me/?text=${encodeURIComponent(`Check out this resource: ${shareResource.title}\n${url}`)}`, '_blank');
+                  }}
+                >
+                  WhatsApp
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    const url = resourcesService.getShareUrl(shareResource);
+                    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out this resource: ${shareResource.title}`)}&url=${encodeURIComponent(url)}`, '_blank');
+                  }}
+                >
+                  Twitter
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    const url = resourcesService.getShareUrl(shareResource);
+                    window.open(`mailto:?subject=${encodeURIComponent(shareResource.title)}&body=${encodeURIComponent(`Check out this resource:\n${url}`)}`, '_blank');
+                  }}
+                >
+                  Email
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Upload Form */}
-      <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Share a Learning Resource</h2>
+      <Card className="p-8 border-t-4 border-t-purple-500 shadow-lg relative overflow-hidden bg-background/60 backdrop-blur-md">
+        {uploading && (
+          <motion.div
+            className="absolute top-0 left-0 h-1 bg-purple-500 z-50"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+          />
+        )}
+
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Upload className="h-6 w-6 text-purple-500" />
+            Share Resource
+          </h2>
+          {uploading && (
+            <span className="text-sm font-medium text-purple-600 animate-pulse">
+              Uploading... {progress}%
+            </span>
+          )}
+        </div>
+
+        {/* File Drop Zone */}
+        <div
+          className={`border-2 border-dashed rounded-xl p-6 mb-6 text-center transition-all cursor-pointer
+            ${dragActive ? "border-purple-500 bg-purple-500/10" : "border-muted-foreground/30 hover:border-purple-400"}
+            ${selectedFile ? "border-green-500 bg-green-500/10" : ""}`}
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            onChange={handleFileInputChange}
+            accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.zip,.rar,.jpg,.jpeg,.png,.gif,.webp"
+            disabled={uploading}
+          />
+
+          {selectedFile ? (
+            <div className="flex items-center justify-center gap-4">
+              {getFileIcon(selectedFile.type)}
+              <div className="text-left">
+                <p className="font-medium text-foreground">{selectedFile.name}</p>
+                <p className="text-sm text-muted-foreground">{formatFileSize(selectedFile.size)}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeSelectedFile();
+                }}
+                className="ml-2"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
+              <p className="text-muted-foreground mb-1">
+                <span className="font-medium text-purple-500">Click to upload</span> or drag and drop
+              </p>
+              <p className="text-xs text-muted-foreground">
+                PDF, Images, Word, PowerPoint, ZIP (Max 50MB)
+              </p>
+            </>
+          )}
+        </div>
 
         <div className="grid md:grid-cols-2 gap-4">
           <Input
             placeholder="Resource Title"
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
+            disabled={uploading}
           />
 
-          <Select value={form.subject} onValueChange={(v) => setForm({ ...form, subject: v })}>
+          <Select value={form.subject} onValueChange={(v) => setForm({ ...form, subject: v })} disabled={uploading}>
             <SelectTrigger>
               <SelectValue placeholder="Select Subject" />
             </SelectTrigger>
@@ -73,7 +409,7 @@ const Resources = () => {
             </SelectContent>
           </Select>
 
-          <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+          <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })} disabled={uploading}>
             <SelectTrigger>
               <SelectValue placeholder="Resource Type" />
             </SelectTrigger>
@@ -87,56 +423,166 @@ const Resources = () => {
           </Select>
 
           <Input
-            placeholder="Resource Link (optional)"
+            placeholder="Link (optional if file uploaded)"
             value={form.link}
             onChange={(e) => setForm({ ...form, link: e.target.value })}
+            disabled={uploading}
           />
         </div>
 
         <Textarea
           className="mt-4"
-          placeholder="Short description"
+          placeholder="What makes this resource useful?"
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
+          disabled={uploading}
         />
 
-        <Button className="mt-4" onClick={addResource}>
-          Add Resource
-        </Button>
+        <div className="mt-4 flex justify-end">
+          <Button
+            onClick={addResource}
+            disabled={uploading || !form.title || !form.subject || (!selectedFile && !form.link)}
+            className="w-full md:w-auto bg-purple-600 hover:bg-purple-700"
+          >
+            {uploading ? "Uploading..." : "Share Resource"}
+          </Button>
+        </div>
       </Card>
 
       {/* Resource Feed */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {resources.map((r) => (
-          <Card key={r.id} className="p-5 space-y-2">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">{r.title}</h3>
-              <span className="text-sm text-muted-foreground">{r.subject}</span>
-            </div>
-            <p className="text-sm text-muted-foreground">{r.description}</p>
-
-            {r.link && (
-              <a href={r.link} target="_blank" className="text-primary text-sm">
-                View Resource
-              </a>
-            )}
-
-            {/* Rating */}
-            <div className="flex gap-1 mt-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <span
-                  key={star}
-                  className={`cursor-pointer ${r.average_rating >= star ? "text-yellow-400" : "text-gray-300"}`}
-                  onClick={() => rateResource(r.id, star)}
+      <motion.div
+        className="grid md:grid-cols-2 gap-6"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          visible: { transition: { staggerChildren: 0.1 } },
+        }}
+      >
+        <AnimatePresence>
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="p-6 h-full bg-background/40 backdrop-blur-md">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-10 w-10 rounded-lg" />
+                    <Skeleton className="h-5 w-32" />
+                  </div>
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+                <Skeleton className="h-4 w-full mt-2" />
+                <Skeleton className="h-4 w-3/4 mt-2" />
+                <div className="mt-6 space-y-3">
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              </Card>
+            ))
+          ) : (
+            resources.map((r) => (
+              <motion.div
+                key={r.id}
+                variants={{
+                  hidden: { opacity: 0, scale: 0.9 },
+                  visible: { opacity: 1, scale: 1 },
+                }}
+                layout
+                whileHover={{ y: -5 }}
+              >
+                <Card className={`p-6 h-full flex flex-col justify-between hover:shadow-lg transition-all border-l-4 bg-background/40 backdrop-blur-md
+                  ${justUploaded === r.id ? "border-l-green-500 ring-2 ring-green-500/30" : "border-l-transparent hover:border-l-purple-400"}`}
                 >
-                  ★
-                </span>
-              ))}
-            </div>
-          </Card>
-        ))}
-      </div>
-    </div>
+                  <div>
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 bg-secondary rounded-lg">
+                          {getFileIcon(r.fileType)}
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold line-clamp-1">{r.title}</h3>
+                          {r.fileName && (
+                            <p className="text-xs text-muted-foreground">
+                              {r.fileName} {r.fileSize && `• ${formatFileSize(r.fileSize)}`}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-xs px-2 py-1 bg-secondary rounded-full text-muted-foreground">
+                        {r.subject}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{r.description}</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center border-t pt-4">
+                      <div className="flex items-center gap-2">
+                        {r.fileUrl ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDownload(r)}
+                            className="text-purple-600 gap-1 hover:text-purple-700 p-0 h-auto"
+                          >
+                            <Download className="h-4 w-4" /> Download
+                          </Button>
+                        ) : r.link ? (
+                          <a
+                            href={r.link}
+                            target="_blank"
+                            className="text-purple-600 text-sm font-medium flex items-center gap-1 hover:underline"
+                          >
+                            <ExternalLink className="h-3 w-3" /> View
+                          </a>
+                        ) : null}
+
+                        {/* Share Button */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openShareDialog(r)}
+                          className="text-muted-foreground gap-1 hover:text-purple-600 p-0 h-auto ml-3"
+                        >
+                          <Share2 className="h-4 w-4" /> Share
+                        </Button>
+                      </div>
+                      <div className="flex items-center text-xs text-muted-foreground gap-1">
+                        <Download className="h-3 w-3" /> {r.downloads}
+                      </div>
+                    </div>
+
+                    {/* Interactive Rating */}
+                    <div className="flex justify-between items-center bg-secondary/30 p-2 rounded-lg">
+                      <span className="text-xs font-medium">Rate:</span>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <motion.button
+                            key={star}
+                            whileHover={{ scale: 1.2 }}
+                            whileTap={{ scale: 0.9 }}
+                            className={`cursor-pointer ${r.average_rating >= star ? "text-yellow-400" : "text-gray-300"}`}
+                            onClick={() => rateResource(r.id, star)}
+                          >
+                            <Sparkles className={`h-4 w-4 ${r.average_rating >= star ? "fill-current" : ""}`} />
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            ))
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {resources.length === 0 && !uploading && !loading && (
+        <div className="text-center py-12 text-muted-foreground">
+          <Upload className="h-16 w-16 mx-auto mb-4 opacity-50" />
+          <p className="text-lg font-medium">No resources shared yet</p>
+          <p className="text-sm">Be the first to share a resource with your peers!</p>
+        </div>
+      )}
+    </PageTransition>
   );
 };
 

@@ -7,10 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useAppContext } from '@/contexts/AppContext';
-import { 
-  Edit, 
-  MapPin, 
-  Calendar, 
+import {
+  Edit,
+  MapPin,
+  Calendar,
   Github,
   Linkedin,
   Code2,
@@ -24,12 +24,12 @@ const ProfilePage: React.FC = () => {
   const { user, setUser } = useAppContext();
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
-    name: user?.name || '',
-    bio: 'Full-stack developer passionate about React, BootStrap, and open-source. Always learning new technologies and building cool stuff!',
-    location: 'Jammu & Kashmir, India',
-    website: 'https://tanviGanotra.dev',
-    github: 'TanviGanotra30',
-    linkedin: 'tanvi-ganotra'
+    name: user?.name || 'Harsh Pawar',
+    bio: 'Full-stack developer passionate about React, Node.js, and open-source. Always learning new technologies and building cool stuff!',
+    location: 'LPU, Punjab, India',
+    website: 'https://harshpawar.dev',
+    github: 'harshpawar',
+    linkedin: 'harsh-pawar'
   });
 
   const stats = [
@@ -56,7 +56,7 @@ const ProfilePage: React.FC = () => {
     }
   ];
 
-  const Study Groups = [
+  const studyGroups = [
     {
       id: '1',
       name: 'React UI Library',
@@ -97,13 +97,13 @@ const ProfilePage: React.FC = () => {
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex flex-col items-center md:items-start">
               <Avatar className="h-24 w-24 mb-4">
-                <AvatarImage src="https://media.istockphoto.com/id/1186723101/photo/digital-3d-illustration-of-a-toon-girl.webp?a=1&b=1&s=612x612&w=0&k=20&c=rIBUz9p3Tr60ncI26uuu1N-qxwbKEs5_kEgWmJGMX0U="/>
+                <AvatarImage src="https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=HarshPawar&backgroundColor=b6e3f4" />
                 <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
               </Avatar>
-              
+
               <div className="flex gap-2">
-                <Button 
-                  variant={isEditing ? "default" : "outline"} 
+                <Button
+                  variant={isEditing ? "default" : "outline"}
                   size="sm"
                   onClick={() => isEditing ? handleSaveProfile() : setIsEditing(true)}
                   className="gap-2"
@@ -150,7 +150,7 @@ const ProfilePage: React.FC = () => {
                   <div>
                     <h1 className="text-2xl font-bold mb-2">{user.name}</h1>
                     <p className="text-muted-foreground mb-3">{editForm.bio}</p>
-                    
+
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
                       <div className="flex items-center gap-1">
                         <MapPin className="h-4 w-4" />
@@ -163,11 +163,11 @@ const ProfilePage: React.FC = () => {
                     </div>
 
                     <div className="flex gap-3">
-                      <a href="https://github.com/TanviGanotra30" target="_blank"><Button variant="ghost" size="sm" className="gap-2 p-0 h-auto">
+                      <a href="https://github.com/harshpawar" target="_blank" rel="noopener noreferrer"><Button variant="ghost" size="sm" className="gap-2 p-0 h-auto">
                         <Github className="h-4 w-4" />
                         {editForm.github}
                       </Button></a>
-                     <a href="https://www.linkedin.com/in/tanvi-ganotra/" target='_blank'><Button variant="ghost" size="sm" className="gap-2 p-0 h-auto">
+                      <a href="https://www.linkedin.com/in/harsh-pawar/" target="_blank" rel="noopener noreferrer"><Button variant="ghost" size="sm" className="gap-2 p-0 h-auto">
                         <Linkedin className="h-4 w-4" />
                         {editForm.linkedin}
                       </Button></a>
@@ -226,19 +226,19 @@ const ProfilePage: React.FC = () => {
           ))}
         </TabsContent>
 
-        <TabsContent value="Study Groups" className="space-y-4">
-          {Study Groups.map((Study Group) => (
-            <Card key={Study Group.id}>
+        <TabsContent value="groups" className="space-y-4">
+          {studyGroups.map((group) => (
+            <Card key={group.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold">{Study Group.name}</h3>
+                    <h3 className="font-semibold">{group.name}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {Study Group.role} • {Study Group.members} members • {Study Group.project}
+                      {group.role} • {group.members} members • {group.project}
                     </p>
                   </div>
                   <Button variant="outline" size="sm">
-                    View Study Group
+                    View
                   </Button>
                 </div>
               </CardContent>
@@ -262,7 +262,7 @@ const ProfilePage: React.FC = () => {
                 </div>
                 <Button variant="outline" size="sm">Configure</Button>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-medium">Privacy Settings</h4>
@@ -270,7 +270,7 @@ const ProfilePage: React.FC = () => {
                 </div>
                 <Button variant="outline" size="sm">Manage</Button>
               </div>
-              
+
               <div className="pt-4 border-t">
                 <Button variant="destructive" onClick={handleLogout}>
                   Sign Out
@@ -280,7 +280,7 @@ const ProfilePage: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </div >
   );
 };
 
