@@ -36,7 +36,8 @@ const StudyRoomsPage = lazy(() => import("@/pages/StudyRoomsPage"));
 const ActivityPage = lazy(() => import("@/pages/ActivityPage"));
 const NotificationsPage = lazy(() => import("@/pages/NotificationsPage"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
-// Admin pages
+// Admin pages with dedicated layout
+const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
 const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
 const UserManagement = lazy(() => import("@/pages/UserManagement"));
 const ContentModeration = lazy(() => import("@/pages/ContentModeration"));
@@ -91,16 +92,16 @@ const AppRoutes = () => {
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+          </Route>
 
-            {/* Admin Routes - Protected */}
-            <Route element={<AdminRoute />}>
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/users" element={<UserManagement />} />
-              <Route path="/admin/moderation" element={<ContentModeration />} />
-              <Route path="/admin/analytics" element={<AdminAnalytics />} />
-              <Route path="/admin/user-work" element={<AdminUserWork />} />
-              <Route path="/admin/content" element={<AdminContentManagement />} />
-            </Route>
+          {/* Admin Routes - Dedicated Admin Layout with Sidebar */}
+          <Route element={<AdminLayout />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/moderation" element={<ContentModeration />} />
+            <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route path="/admin/user-work" element={<AdminUserWork />} />
+            <Route path="/admin/content" element={<AdminContentManagement />} />
           </Route>
         </Routes>
       </Suspense>
@@ -110,7 +111,6 @@ const AppRoutes = () => {
 
 import GlobalBackground from "@/components/GlobalBackground";
 import { CommandPalette } from "@/components/CommandPalette";
-import AdminRoute from "@/components/AdminRoute";
 
 const App = () => {
   return (

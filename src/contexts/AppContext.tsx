@@ -50,6 +50,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       } = supabase.auth.onAuthStateChange((_event, session) => {
         setSession(session);
         if (session?.user) {
+          setLoading(true); // Wait for profile fetch
           convertSupabaseUser(session.user);
           fetchProfile(session.user.id);
         } else {
@@ -61,26 +62,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
       return () => subscription.unsubscribe();
     } else {
-      // Mock mode
-      console.log('⚠️ Supabase not configured - using mock authentication');
-      const loadUser = async () => {
-        const token = localStorage.getItem('token');
-        if (token) {
-          const savedUser = localStorage.getItem('mockUser');
-          if (savedUser) {
-            try {
-              setUser(JSON.parse(savedUser));
-            } catch (err) {
-              console.error('Failed to parse saved user:', err);
-              localStorage.removeItem('token');
-              localStorage.removeItem('mockUser');
-              setUser(null);
-            }
-          }
-        }
-        setLoading(false);
-      };
-      loadUser();
+      console.warn('Supabase not configured. Authentication will not work.');
+      setLoading(false);
     }
   }, []);
 
@@ -93,6 +76,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       techStack: [],
     };
     setUser(user);
+    if (user.role && user.role === 'admin') {
+      // local update not needed really as we fetch profile next
+    }
   };
 
   const fetchProfile = async (userId: string) => {
@@ -128,18 +114,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       });
       if (error) throw error;
     } else {
-      // Mock login
-      await new Promise(resolve => setTimeout(resolve, 800));
-      const mockUser: User = {
-        id: "mock-" + Date.now(),
-        name: email.split('@')[0],
-        email: email,
-        avatar: `https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${email}&backgroundColor=b6e3f4`,
-        techStack: ["React", "TypeScript", "Node.js"]
-      };
-      localStorage.setItem('token', 'mock-token-' + Date.now());
-      localStorage.setItem('mockUser', JSON.stringify(mockUser));
-      setUser(mockUser);
+      throw new Error('Supabase not configured');
     }
   };
 
@@ -158,31 +133,40 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       });
       if (error) throw error;
 
-      // Note: We're using MongoDB for user data, not Supabase profiles table
-      // The user will be created in MongoDB via the /auth/sync endpoint when they first login
-      // or we can sync immediately if the session is available
       if (data.session) {
-        // User is auto-confirmed (email confirmation disabled in Supabase settings)
-        // Session is available immediately
+        // Create profile in database
+        if (data.user) {
+          const { error: profileError } = await supabase.from('profiles').insert([
+            {
+              id: data.user.id,
+              email: email,
+              name: name,
+              role: 'user',
+              contributions: 0,
+              streak: 0,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }
+          ]);
+
+          if (profileError) {
+            console.error('Error creating profile:', profileError);
+            // Verify if it's a "duplicate key" error (trigger might exist?), if so ignore.
+            // But for now logs are enough.
+          } else {
+            console.log('✅ Profile created successfully');
+            // Force refresh of session/profile?
+            // onAuthStateChange should handle it.
+          }
+        }
+
         console.log('✅ User registered and auto-confirmed');
       } else {
-        // Email confirmation required - user will need to check their email
         console.log('📧 Please check your email to confirm your account');
         throw new Error('Please check your email to confirm your account before logging in.');
       }
     } else {
-      // Mock registration
-      await new Promise(resolve => setTimeout(resolve, 800));
-      const mockUser: User = {
-        id: "mock-" + Date.now(),
-        name: name,
-        email: email,
-        avatar: `https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${email}&backgroundColor=b6e3f4`,
-        techStack: []
-      };
-      localStorage.setItem('token', 'mock-token-' + Date.now());
-      localStorage.setItem('mockUser', JSON.stringify(mockUser));
-      setUser(mockUser);
+      throw new Error('Supabase not configured');
     }
   };
 
@@ -197,18 +181,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       });
       if (error) throw error;
     } else {
-      // Mock GitHub login
-      await new Promise(resolve => setTimeout(resolve, 800));
-      const mockUser: User = {
-        id: "github-123",
-        name: "GitHub Developer",
-        email: "github@learnhub.com",
-        avatar: "https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=GitHubDev&backgroundColor=b6e3f4",
-        techStack: ["React", "TypeScript", "Open Source"]
-      };
-      localStorage.setItem('token', 'mock-github-token');
-      localStorage.setItem('mockUser', JSON.stringify(mockUser));
-      setUser(mockUser);
+      throw new Error('Supabase not configured');
     }
   };
 
@@ -217,12 +190,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       // Supabase logout
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-    } else {
-      // Mock logout
-      localStorage.removeItem('token');
-      localStorage.removeItem('mockUser');
-      setUser(null);
     }
+    setUser(null);
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
@@ -232,11 +201,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     // Just update local state for now
     const updatedUser = { ...user, ...updates };
     setUser(updatedUser);
-
-    if (!isSupabaseConfigured) {
-      // Mock mode - save to localStorage
-      localStorage.setItem('mockUser', JSON.stringify(updatedUser));
-    }
   };
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);

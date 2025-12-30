@@ -16,19 +16,30 @@ import {
     Settings,
     Activity,
     FolderOpen,
+    BookOpen,
+    UserPlus,
+    Ban,
 } from 'lucide-react';
-import PageTransition from '@/components/PageTransition';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { adminService } from '@/services/admin.service';
+import { adminSupabaseService } from '@/services/admin.supabase.service';
+import { isSupabaseConfigured } from '@/lib/supabase';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function AdminDashboard() {
     const navigate = useNavigate();
 
     const { data: stats, isLoading } = useQuery({
         queryKey: ['adminStats'],
-        queryFn: adminService.getStats
+        queryFn: adminSupabaseService.getStats,
+        enabled: isSupabaseConfigured,
+    });
+
+    const { data: recentUsers } = useQuery({
+        queryKey: ['recentSignups'],
+        queryFn: () => adminSupabaseService.getRecentSignups(7),
+        enabled: isSupabaseConfigured,
     });
 
     const recentActivity = [
@@ -64,14 +75,16 @@ export default function AdminDashboard() {
     const displayStats = stats || {
         totalUsers: 0,
         activeUsers: 0,
+        bannedUsers: 0,
+        adminCount: 0,
         totalPosts: 0,
         totalQuestions: 0,
-        pendingReports: 0,
-        resolvedToday: 0
+        totalResources: 0,
+        totalGroups: 0
     };
 
     return (
-        <PageTransition className="container mx-auto px-4 py-8 space-y-6 max-w-7xl">
+        <div className="space-y-6">
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -195,17 +208,17 @@ export default function AdminDashboard() {
                 >
                     <Card className="card-premium border-red-500/20 bg-red-500/5">
                         <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Reports</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Banned Users</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <div className="text-3xl font-bold">{displayStats.pendingReports}</div>
+                                    <div className="text-3xl font-bold">{displayStats.bannedUsers}</div>
                                     <p className="text-xs text-muted-foreground mt-1">
-                                        Requires attention
+                                        Currently banned
                                     </p>
                                 </div>
-                                <AlertCircle className="h-12 w-12 text-red-500 opacity-50" />
+                                <Ban className="h-12 w-12 text-red-500 opacity-50" />
                             </div>
                         </CardContent>
                     </Card>
@@ -218,17 +231,17 @@ export default function AdminDashboard() {
                 >
                     <Card className="card-premium border-cyan-500/20 bg-cyan-500/5">
                         <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Resolved Today</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Resources</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <div className="text-3xl font-bold">{displayStats.resolvedToday}</div>
+                                    <div className="text-3xl font-bold">{displayStats.totalResources}</div>
                                     <p className="text-xs text-muted-foreground mt-1">
-                                        Great job! 🎉
+                                        Shared materials
                                     </p>
                                 </div>
-                                <CheckCircle className="h-12 w-12 text-cyan-500 opacity-50" />
+                                <BookOpen className="h-12 w-12 text-cyan-500 opacity-50" />
                             </div>
                         </CardContent>
                     </Card>
@@ -301,6 +314,6 @@ export default function AdminDashboard() {
                     </div>
                 </CardContent>
             </Card>
-        </PageTransition>
+        </div>
     );
 }

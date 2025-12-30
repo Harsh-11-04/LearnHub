@@ -104,6 +104,32 @@ const Header: React.FC = () => {
                 </motion.button>
               );
             })}
+            {/* Admin Portal Link - visible for admin users */}
+            {user?.role === 'admin' && (
+              <motion.button
+                onClick={() => navigate('/admin')}
+                className={`
+                  relative px-4 py-2 rounded-full text-sm font-medium transition-colors
+                  ${location.pathname.startsWith('/admin')
+                    ? "text-purple-600 dark:text-purple-400"
+                    : "text-muted-foreground hover:text-purple-500"}
+                `}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {location.pathname.startsWith('/admin') && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute inset-0 bg-purple-100 dark:bg-purple-900/30 rounded-full"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  Admin
+                </span>
+              </motion.button>
+            )}
           </nav>
         )}
 
@@ -277,6 +303,15 @@ const Header: React.FC = () => {
                   <Activity className="mr-2 h-4 w-4" />
                   <span>Activity</span>
                 </DropdownMenuItem>
+                {user?.role === 'admin' && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/admin')} className="text-purple-600 dark:text-purple-400">
+                      <Shield className="mr-2 h-4 w-4" />
+                      <span>Admin Portal</span>
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => logout()}>
                   <LogOut className="mr-2 h-4 w-4" />

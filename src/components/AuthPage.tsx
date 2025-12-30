@@ -9,17 +9,21 @@ import { Code2, Github, ArrowLeft, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const AuthPage: React.FC = () => {
-  const { login, register, loginWithGithub, isAuthenticated } = useAppContext();
+  const { login, register, loginWithGithub, isAuthenticated, user, loading } = useAppContext();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
+    if (!loading && isAuthenticated && user) {
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [loading, isAuthenticated, user, navigate]);
 
   const handleGithubAuth = async () => {
     try {
@@ -31,21 +35,7 @@ const AuthPage: React.FC = () => {
     }
   };
 
-  const handleAdminLogin = async () => {
-    try {
-      // Admin credentials for Supabase
-      await login('admin@learnhub.dev', 'LearnHub@Admin2024');
-      navigate('/admin');
-    } catch (error: any) {
-      console.error('Admin login failed:', error);
-      // Show error message
-      if (error.message?.includes('Invalid login credentials')) {
-        alert('❌ Admin account not set up yet. Please run the migration-admin-setup.sql in Supabase first.');
-      } else {
-        alert(`❌ Admin login failed: ${error.message || 'Unknown error'}`);
-      }
-    }
-  };
+
 
   const handleEmailAuth = async (isSignUp: boolean) => {
     if (!email || !password || (isSignUp && !name)) return;
@@ -201,16 +191,6 @@ const AuthPage: React.FC = () => {
             >
               <Github className="h-4 w-4" />
               Continue with GitHub
-            </Button>
-
-            {/* Admin Login Button */}
-            <Button
-              variant="outline"
-              className="w-full gap-2 border-purple-400 dark:border-purple-600 text-purple-700 dark:text-purple-300 hover:bg-purple-100/50 dark:hover:bg-purple-900/30 transition-colors"
-              onClick={handleAdminLogin}
-            >
-              <Shield className="h-4 w-4" />
-              Login as Admin
             </Button>
           </div>
         </CardContent>
