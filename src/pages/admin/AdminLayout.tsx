@@ -334,10 +334,56 @@ const AdminLayout = () => {
                         </div>
 
                         {/* Notifications */}
-                        <Button variant="ghost" size="icon" className="relative">
-                            <Bell className="w-5 h-5" />
-                            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full" />
-                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="relative">
+                                    <Bell className="w-5 h-5" />
+                                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-80">
+                                <DropdownMenuLabel className="flex items-center justify-between">
+                                    <span>Notifications</span>
+                                    <span className="text-xs text-muted-foreground font-normal hover:text-primary cursor-pointer">Mark all as read</span>
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <div className="max-h-[300px] overflow-y-auto">
+                                    <DropdownMenuItem className="cursor-pointer flex flex-col items-start gap-1 p-3">
+                                        <div className="flex items-center justify-between w-full">
+                                            <span className="font-medium text-sm">New User Registration</span>
+                                            <span className="text-[10px] text-muted-foreground">2 min ago</span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            User "john_doe" has created a new account.
+                                        </p>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="cursor-pointer flex flex-col items-start gap-1 p-3">
+                                        <div className="flex items-center justify-between w-full">
+                                            <span className="font-medium text-sm">Content Reported</span>
+                                            <span className="text-[10px] text-muted-foreground">1 hour ago</span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Post #1234 has been flagged for inappropriate content.
+                                        </p>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="cursor-pointer flex flex-col items-start gap-1 p-3">
+                                        <div className="flex items-center justify-between w-full">
+                                            <span className="font-medium text-sm">System Update</span>
+                                            <span className="text-[10px] text-muted-foreground">5 hours ago</span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            System maintenance scheduled for tonight at 2 AM.
+                                        </p>
+                                    </DropdownMenuItem>
+                                </div>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="justify-center text-center text-xs text-primary cursor-pointer py-2">
+                                    View all notifications
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
                         {/* User Dropdown */}
                         <DropdownMenu>
