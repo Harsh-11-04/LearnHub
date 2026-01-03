@@ -3,54 +3,87 @@
 ![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-06B6D4?logo=tailwindcss)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white)
 
 > A peer-to-peer learning platform where students share resources, collaborate in study groups, and support each other academically. 📚
 
 ---
 
 ## 📘 Project Overview
-**LearnHub** is a peer-to-peer learning and resource sharing platform built as an academic project. It focuses on collaborative learning by allowing users to share study materials, organize resources by subject, and participate in community-driven learning activities.
-
-The project emphasizes clean architecture, reusable components, and strong TypeScript domain models, and is designed to be extendable with backend services in the future.
-
----
-
-## 🎯 Objectives
-- Enable students to share learning resources (notes, PDFs, videos, links)
-- Organize resources by subject and tags
-- Encourage peer participation through ratings and contributions
-- Provide a scalable foundation for study groups and Q&A discussions
+**LearnHub** is a full-stack peer-to-peer learning platform with Supabase backend integration. It enables collaborative learning through resource sharing, real-time notifications, gamification, and community features.
 
 ---
 
 ## ✨ Features
 
-### ✅ Implemented
-- Resource upload and shared resource feed
-- Subject-based categorization and tagging
-- 1–5 star rating system for resources
-- Responsive and accessible UI using Tailwind CSS
-- Centralized TypeScript domain models (`src/types/learning.ts`)
+### 📚 Core Features
+- Resource upload with file validation & Supabase Storage
+- Subject-based categorization and search
+- 1–5 star rating system
+- Bookmarks/Favorites
+- Comments & Discussions
+- Content Reporting
 
-### 🛠️ Planned / Future Scope
-- Study groups / learning circles
-- Q&A discussion forum
-- Contribution points, badges, and leaderboard
-- User profiles with learning interests
-- Backend integration (authentication, database, file storage)
+### 👥 Social Features
+- Follow users
+- Real-time notifications
+- Activity feed
+
+### 🏆 Gamification
+- Achievement badges
+- Points & Levels
+- Leaderboard
+
+### 🛡️ Admin Portal
+- User management
+- Content moderation
+- Analytics dashboard
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Frontend
-- **Framework:** React + TypeScript (Vite)
-- **Styling:** Tailwind CSS, shadcn/ui
-- **Routing:** React Router
-- **State Management:** React Hooks
+| Layer | Technology |
+|-------|------------|
+| Frontend | React, TypeScript, Vite |
+| Styling | Tailwind CSS, shadcn/ui |
+| Backend | Supabase (Auth, Database, Storage) |
+| State | React Hooks, Context API |
+| Testing | Vitest, React Testing Library |
+| CI/CD | GitHub Actions |
 
-### Version Control
-- Git & GitHub
+---
+
+## 🚀 Quick Start
+
+```bash
+# Clone the repo
+git clone https://github.com/Harsh-11-04/LearnHub.git
+cd LearnHub
+
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+# Add your Supabase credentials to .env
+
+# Run database migration (in Supabase SQL Editor)
+# Open migration-all-features.sql and run it
+
+# Start dev server
+npm run dev
+```
+
+---
+
+## 📦 Environment Variables
+
+Create a `.env` file:
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
+```
 
 ---
 
@@ -59,43 +92,26 @@ The project emphasizes clean architecture, reusable components, and strong TypeS
 src/
  ├── components/     # Reusable UI components
  ├── pages/          # Application pages
- ├── types/          # TypeScript domain models (learning.ts)
- ├── hooks/          # Custom hooks
+ ├── services/       # API services (Supabase)
  ├── contexts/       # Global state/context
- ├── App.tsx
- └── main.tsx
+ ├── lib/            # Utilities and helpers
+ └── types/          # TypeScript types
 ```
 
 ---
 
-## 🧪 How to Run the Project
+## 🧪 Testing
+
 ```bash
-npm install
-npm run dev
+npm test        # Run tests
+npm run build   # Production build
 ```
-
-The application runs locally using Vite.
-
----
-
-## 🎓 Academic Relevance
-This project demonstrates:
-- Component-based frontend architecture
-- Strong use of TypeScript interfaces and type safety
-- Separation of concerns and scalable project structure
-- Practical application of peer-to-peer learning concepts
-
----
-
-## 📌 Notes
-- The repository was kept **private during development** and can be made public for evaluation.
-- Backend features mentioned are part of **future scope** and not required for the current academic submission.
 
 ---
 
 ## 👤 Author
 **Harsh Pawar**  
-Peer-to-Peer Learning Platform (Academic Project)
+Peer-to-Peer Learning Platform
 
 ---
 
