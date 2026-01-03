@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useAppContext } from "@/contexts/AppContext";
 import { RESOURCE_TYPES, SUBJECTS } from "@/types/learning";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ import {
   Copy,
   Link2
 } from "lucide-react";
+import { validateFile as enhancedValidateFile } from "@/lib/fileValidation";
 import { toast } from "sonner";
 import { resourcesService, ResourceItem } from "@/services/resources.service";
 import {
@@ -32,6 +34,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { BookmarkButton } from "@/components/BookmarkButton";
+import { ReportButton } from "@/components/ReportButton";
 
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Bytes';
@@ -70,6 +74,19 @@ const Resources = () => {
     link: "",
   });
 
+  // Search and Filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterSubject, setFilterSubject] = useState<string>("all");
+  const [filterType, setFilterType] = useState<string>("all");
+
+  // Get user role for permissions
+  const { user } = useAppContext();
+  const canUpload = user && (user.role === 'user' || user.role === 'admin');
+
+  // Pagination state
+  const [itemsPerPage] = useState(8);
+  const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -86,10 +103,14 @@ const Resources = () => {
   }, []);
 
   const handleFileSelect = (file: File) => {
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error("File too large. Maximum size is 50MB");
+    // Use enhanced validation
+    const validation = enhancedValidateFile(file);
+
+    if (!validation.isValid) {
+      toast.error(validation.error || "Invalid file");
       return;
     }
+
     setSelectedFile(file);
     if (!form.title) {
       const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
@@ -153,6 +174,28 @@ const Resources = () => {
     if (!selectedFile && !form.link) {
       toast.error("Please upload a file or provide a link");
       return;
+    }
+
+    // Check for duplicates
+    try {
+      const duplicate = await resourcesService.checkDuplicate(form.title, form.subject);
+
+      if (duplicate) {
+        const confirmed = window.confirm(
+          `A similar resource titled "${duplicate.title}" already exists in ${duplicate.subject}.\n\n` +
+          `Created: ${new Date(duplicate.createdAt).toLocaleDateString()}\n` +
+          `Downloads: ${duplicate.downloads}\n\n` +
+          `Do you want to upload this resource anyway?`
+        );
+
+        if (!confirmed) {
+          toast.info("Upload cancelled");
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Duplicate check failed:', error);
+      // Continue with upload even if duplicate check fails
     }
 
     setUploading(true);
@@ -225,6 +268,42 @@ const Resources = () => {
     );
     await resourcesService.rate(id, rating);
   };
+
+  // Filter and search resources
+  const filteredResources = resources.filter((resource) => {
+    const matchesSearch =
+      searchQuery === "" ||
+      resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resource.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesSubject = filterSubject === "all" || resource.subject === filterSubject;
+    const matchesType = filterType === "all" || resource.type === filterType;
+
+    return matchesSearch && matchesSubject && matchesType;
+  });
+
+  // Paginate filtered resources
+  const totalPages = Math.ceil(filteredResources.length / itemsPerPage);
+  const paginatedResources = filteredResources.slice(0, currentPage * itemsPerPage);
+  const hasMore = currentPage < totalPages;
+
+  const loadMore = () => {
+    if (hasMore) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setFilterSubject("all");
+    setFilterType("all");
+    setCurrentPage(1); // Reset to first page
+  };
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterSubject, filterType]);
 
   return (
     <PageTransition className="container mx-auto px-4 py-10 space-y-10 max-w-5xl">
@@ -314,139 +393,213 @@ const Resources = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Upload Form */}
-      <Card className="p-8 border-t-4 border-t-purple-500 shadow-lg relative overflow-hidden bg-background/60 backdrop-blur-md">
-        {uploading && (
-          <motion.div
-            className="absolute top-0 left-0 h-1 bg-purple-500 z-50"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-          />
-        )}
-
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Upload className="h-6 w-6 text-purple-500" />
-            Share Resource
-          </h2>
+      {/* Upload Form - Only for authenticated users */}
+      {canUpload ? (
+        <Card className="p-8 border-t-4 border-t-purple-500 shadow-lg relative overflow-hidden bg-background/60 backdrop-blur-md">
           {uploading && (
-            <span className="text-sm font-medium text-purple-600 animate-pulse">
-              Uploading... {progress}%
-            </span>
+            <motion.div
+              className="absolute top-0 left-0 h-1 bg-purple-500 z-50"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+            />
           )}
-        </div>
 
-        {/* File Drop Zone */}
-        <div
-          className={`border-2 border-dashed rounded-xl p-6 mb-6 text-center transition-all cursor-pointer
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Upload className="h-6 w-6 text-purple-500" />
+              Share Resource
+            </h2>
+            {uploading && (
+              <span className="text-sm font-medium text-purple-600 animate-pulse">
+                Uploading... {progress}%
+              </span>
+            )}
+          </div>
+
+          {/* File Drop Zone */}
+          <div
+            className={`border-2 border-dashed rounded-xl p-6 mb-6 text-center transition-all cursor-pointer
             ${dragActive ? "border-purple-500 bg-purple-500/10" : "border-muted-foreground/30 hover:border-purple-400"}
             ${selectedFile ? "border-green-500 bg-green-500/10" : ""}`}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            onChange={handleFileInputChange}
-            accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.zip,.rar,.jpg,.jpeg,.png,.gif,.webp"
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              onChange={handleFileInputChange}
+              accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.zip,.rar,.jpg,.jpeg,.png,.gif,.webp"
+              disabled={uploading}
+            />
+
+            {selectedFile ? (
+              <div className="flex items-center justify-center gap-4">
+                {getFileIcon(selectedFile.type)}
+                <div className="text-left">
+                  <p className="font-medium text-foreground">{selectedFile.name}</p>
+                  <p className="text-sm text-muted-foreground">{formatFileSize(selectedFile.size)}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeSelectedFile();
+                  }}
+                  className="ml-2"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
+                <p className="text-muted-foreground mb-1">
+                  <span className="font-medium text-purple-500">Click to upload</span> or drag and drop
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  PDF, Images, Word, PowerPoint, ZIP (Max 50MB)
+                </p>
+              </>
+            )}
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <Input
+              placeholder="Resource Title"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              disabled={uploading}
+            />
+
+            <Select value={form.subject} onValueChange={(v) => setForm({ ...form, subject: v })} disabled={uploading}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Subject" />
+              </SelectTrigger>
+              <SelectContent>
+                {SUBJECTS.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })} disabled={uploading}>
+              <SelectTrigger>
+                <SelectValue placeholder="Resource Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {RESOURCE_TYPES.map((t) => (
+                  <SelectItem key={t.value} value={t.value}>
+                    {t.icon} {t.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Input
+              placeholder="Link (optional if file uploaded)"
+              value={form.link}
+              onChange={(e) => setForm({ ...form, link: e.target.value })}
+              disabled={uploading}
+            />
+          </div>
+
+          <Textarea
+            className="mt-4"
+            placeholder="What makes this resource useful?"
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
             disabled={uploading}
           />
 
-          {selectedFile ? (
-            <div className="flex items-center justify-center gap-4">
-              {getFileIcon(selectedFile.type)}
-              <div className="text-left">
-                <p className="font-medium text-foreground">{selectedFile.name}</p>
-                <p className="text-sm text-muted-foreground">{formatFileSize(selectedFile.size)}</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeSelectedFile();
-                }}
-                className="ml-2"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <>
-              <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
-              <p className="text-muted-foreground mb-1">
-                <span className="font-medium text-purple-500">Click to upload</span> or drag and drop
-              </p>
-              <p className="text-xs text-muted-foreground">
-                PDF, Images, Word, PowerPoint, ZIP (Max 50MB)
-              </p>
-            </>
+          <div className="mt-4 flex justify-end">
+            <Button
+              onClick={addResource}
+              disabled={uploading || !form.title || !form.subject || (!selectedFile && !form.link)}
+              className="w-full md:w-auto bg-purple-600 hover:bg-purple-700"
+            >
+              {uploading ? "Uploading..." : "Share Resource"}
+            </Button>
+          </div>
+        </Card>
+      ) : (
+        <Card className="p-8 border-t-4 border-t-amber-500 bg-background/60 backdrop-blur-md">
+          <div className="text-center">
+            <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <h3 className="text-lg font-semibold mb-2">Sign in to Share Resources</h3>
+            <p className="text-muted-foreground mb-4">
+              Only registered users can upload and share resources with the community.
+            </p>
+            <Button
+              onClick={() => window.location.href = '/auth'}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              Sign In / Register
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {/* Search and Filters */}
+      <Card className="p-6 bg-background/60 backdrop-blur-md">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <Input
+              placeholder="🔍 Search resources..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full"
+            />
+          </div>
+
+          <Select value={filterSubject} onValueChange={setFilterSubject}>
+            <SelectTrigger className="w-full md:w-48">
+              <SelectValue placeholder="All Subjects" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Subjects</SelectItem>
+              {SUBJECTS.map((subject) => (
+                <SelectItem key={subject} value={subject}>
+                  {subject}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={filterType} onValueChange={setFilterType}>
+            <SelectTrigger className="w-full md:w-48">
+              <SelectValue placeholder="All Types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              {RESOURCE_TYPES.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.icon} {type.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {(searchQuery || filterSubject !== "all" || filterType !== "all") && (
+            <Button
+              variant="outline"
+              onClick={clearFilters}
+              className="whitespace-nowrap"
+            >
+              <X className="h-4 w-4 mr-2" /> Clear
+            </Button>
           )}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
-          <Input
-            placeholder="Resource Title"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            disabled={uploading}
-          />
-
-          <Select value={form.subject} onValueChange={(v) => setForm({ ...form, subject: v })} disabled={uploading}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Subject" />
-            </SelectTrigger>
-            <SelectContent>
-              {SUBJECTS.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })} disabled={uploading}>
-            <SelectTrigger>
-              <SelectValue placeholder="Resource Type" />
-            </SelectTrigger>
-            <SelectContent>
-              {RESOURCE_TYPES.map((t) => (
-                <SelectItem key={t.value} value={t.value}>
-                  {t.icon} {t.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Input
-            placeholder="Link (optional if file uploaded)"
-            value={form.link}
-            onChange={(e) => setForm({ ...form, link: e.target.value })}
-            disabled={uploading}
-          />
-        </div>
-
-        <Textarea
-          className="mt-4"
-          placeholder="What makes this resource useful?"
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-          disabled={uploading}
-        />
-
-        <div className="mt-4 flex justify-end">
-          <Button
-            onClick={addResource}
-            disabled={uploading || !form.title || !form.subject || (!selectedFile && !form.link)}
-            className="w-full md:w-auto bg-purple-600 hover:bg-purple-700"
-          >
-            {uploading ? "Uploading..." : "Share Resource"}
-          </Button>
-        </div>
+        <p className="text-sm text-muted-foreground mt-4">
+          Showing {Math.min(paginatedResources.length, filteredResources.length)} of {filteredResources.length} resources
+        </p>
       </Card>
 
       {/* Resource Feed */}
@@ -478,7 +631,7 @@ const Resources = () => {
               </Card>
             ))
           ) : (
-            resources.map((r) => (
+            paginatedResources.map((r) => (
               <motion.div
                 key={r.id}
                 variants={{
@@ -544,6 +697,12 @@ const Resources = () => {
                         >
                           <Share2 className="h-4 w-4" /> Share
                         </Button>
+
+                        {/* Bookmark Button */}
+                        <BookmarkButton resourceId={r.id} />
+
+                        {/* Report Button */}
+                        <ReportButton type="resource" targetId={r.id} />
                       </div>
                       <div className="flex items-center text-xs text-muted-foreground gap-1">
                         <Download className="h-3 w-3" /> {r.downloads}
@@ -575,11 +734,37 @@ const Resources = () => {
         </AnimatePresence>
       </motion.div>
 
-      {resources.length === 0 && !uploading && !loading && (
+      {/* Load More Button */}
+      {hasMore && paginatedResources.length > 0 && !loading && (
+        <div className="flex justify-center">
+          <Button
+            onClick={loadMore}
+            variant="outline"
+            size="lg"
+            className="px-8"
+          >
+            Load More Resources
+          </Button>
+        </div>
+      )}
+
+      {filteredResources.length === 0 && !uploading && !loading && (
         <div className="text-center py-12 text-muted-foreground">
           <Upload className="h-16 w-16 mx-auto mb-4 opacity-50" />
-          <p className="text-lg font-medium">No resources shared yet</p>
-          <p className="text-sm">Be the first to share a resource with your peers!</p>
+          {resources.length === 0 ? (
+            <>
+              <p className="text-lg font-medium">No resources shared yet</p>
+              <p className="text-sm">Be the first to share a resource with your peers!</p>
+            </>
+          ) : (
+            <>
+              <p className="text-lg font-medium">No resources found</p>
+              <p className="text-sm">Try adjusting your search or filters</p>
+              <Button variant="outline" onClick={clearFilters} className="mt-4">
+                Clear Filters
+              </Button>
+            </>
+          )}
         </div>
       )}
     </PageTransition>

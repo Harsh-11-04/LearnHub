@@ -72,17 +72,60 @@ export const resourcesService = {
         fileSize: number;
         fileType: string;
     }> => {
-        // Use mock mode for now - files stored as blob URLs
-        // To use Supabase Storage: create a bucket called 'resources' in Supabase Dashboard
+        if (isSupabaseConfigured && supabase) {
+            try {
+                // Generate unique filename to prevent collisions
+                const timestamp = Date.now();
+                const randomStr = Math.random().toString(36).substring(7);
+                const fileExt = file.name.split('.').pop();
+                const uniqueFileName = `${timestamp}-${randomStr}.${fileExt}`;
+                const filePath = `resources/${uniqueFileName}`;
 
-        // Simulate upload progress
+                // Simulate initial progress
+                if (onProgress) onProgress(10);
+
+                // Upload to Supabase Storage
+                const { data, error } = await supabase.storage
+                    .from('resources')
+                    .upload(filePath, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (error) {
+                    console.error('Supabase Storage error:', error);
+                    throw new Error(`Upload failed: ${error.message}`);
+                }
+
+                if (onProgress) onProgress(80);
+
+                // Get public URL
+                const { data: urlData } = supabase.storage
+                    .from('resources')
+                    .getPublicUrl(filePath);
+
+                if (onProgress) onProgress(100);
+
+                return {
+                    fileUrl: urlData.publicUrl,
+                    fileName: file.name,
+                    fileSize: file.size,
+                    fileType: file.type
+                };
+            } catch (err: any) {
+                console.error('Upload error:', err);
+                // Fall back to mock mode on error
+                console.warn('Falling back to mock mode for file upload');
+            }
+        }
+
+        // Mock mode fallback - Use blob URLs for demo
         await new Promise(r => setTimeout(r, 300));
         for (let i = 0; i <= 100; i += 20) {
             if (onProgress) onProgress(i);
             await new Promise(r => setTimeout(r, 100));
         }
 
-        // Create a blob URL for the file (works for demo)
         const blobUrl = URL.createObjectURL(file);
 
         return {
@@ -246,6 +289,62 @@ export const resourcesService = {
         if (resource) {
             resource.average_rating = rating;
         }
+    },
+
+    checkDuplicate: async (title: string, subject: string): Promise<ResourceItem | null> => {
+        if (isSupabaseConfigured && supabase) {
+            try {
+                const { data: userData } = await supabase.auth.getUser();
+
+                if (userData.user?.id) {
+                    const { data, error } = await supabase
+                        .from('resources')
+                        .select(`
+                            *,
+                            profiles:author_id (name)
+                        `)
+                        .ilike('title', title)
+                        .eq('subject', subject)
+                        .eq('author_id', userData.user.id)
+                        .limit(1)
+                        .single();
+
+                    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
+                        console.error('Duplicate check error:', error);
+                        return null;
+                    }
+
+                    if (data) {
+                        return {
+                            id: data.id,
+                            title: data.title,
+                            description: data.description,
+                            subject: data.subject,
+                            type: data.type,
+                            link: data.url,
+                            fileUrl: data.file_url,
+                            fileName: data.file_name,
+                            fileSize: data.file_size,
+                            fileType: data.file_type,
+                            user: data.profiles?.name || 'Unknown',
+                            downloads: data.downloads || 0,
+                            average_rating: data.average_rating || 0,
+                            createdAt: data.created_at
+                        };
+                    }
+                }
+            } catch (err) {
+                console.error('Error checking duplicates:', err);
+            }
+        }
+
+        // Mock mode - check local resources
+        const duplicate = mockResources.find(r =>
+            r.title.toLowerCase() === title.toLowerCase() &&
+            r.subject === subject
+        );
+
+        return duplicate || null;
     },
 
     getShareUrl: (resource: ResourceItem): string => {

@@ -40,6 +40,7 @@ import {
   Bell,
   Activity,
 } from "lucide-react";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAppContext();
@@ -56,6 +57,7 @@ const Header: React.FC = () => {
     { id: "resources", path: "/resources", label: "Resources", icon: Library },
     { id: "groups", path: "/groups", label: "Groups", icon: Users },
     { id: "qa", path: "/qa", label: "Q&A", icon: HelpCircle },
+    { id: "leaderboard", path: "/leaderboard", label: "Ranks", icon: Activity },
   ];
 
   return (
@@ -236,20 +238,8 @@ const Header: React.FC = () => {
             </motion.div>
           )}
 
-          {/* Notifications */}
-          {isAuthenticated && (
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate('/notifications')}
-                className="rounded-full"
-              >
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-              </Button>
-            </motion.div>
-          )}
+          {/* Notifications - Using NotificationBell component */}
+          {isAuthenticated && <NotificationBell />}
 
           {/* Settings */}
           {isAuthenticated && (
