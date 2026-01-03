@@ -119,5 +119,7 @@ export const LeaderboardComponent = () => {
         </Card>
     );
 };
+// Named export for backward compatibility
+export const Leaderboard = LeaderboardComponent;
 
 export default LeaderboardComponent;
