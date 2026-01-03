@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { reportService, Report as ReportData } from '@/services/report.service';
 
 interface Report {
     id: string;
@@ -119,6 +120,37 @@ export default function ContentModeration() {
     const [showReportDetail, setShowReportDetail] = useState(false);
     const [moderationNote, setModerationNote] = useState('');
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Load reports from service
+    useEffect(() => {
+        const loadReports = async () => {
+            try {
+                const pending = await reportService.getPendingReports();
+                // If we have real reports, merge with mock for demo
+                if (pending.length > 0) {
+                    const formattedReports: Report[] = pending.map(r => ({
+                        id: r.id,
+                        type: r.resourceId ? 'resource' : r.commentId ? 'comment' : 'post',
+                        content: r.description || 'No content provided',
+                        contentPreview: r.description?.slice(0, 50) || r.reason,
+                        reporter: { name: 'User', avatar: `https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${r.reporterId}` },
+                        reported: { name: 'Reported User', avatar: 'https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=reported' },
+                        reason: r.reason,
+                        status: r.status as 'pending' | 'resolved' | 'dismissed',
+                        severity: 'medium' as const,
+                        createdAt: r.createdAt
+                    }));
+                    setReports([...formattedReports, ...mockReports.slice(0, 3)]);
+                }
+            } catch (err) {
+                console.error('Error loading reports:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadReports();
+    }, []);
 
     const getTypeIcon = (type: string) => {
         switch (type) {

@@ -6,48 +6,55 @@
 
 @layer base {
   :root {
-    /* Cosmic Professional - Light Mode (Clean & Crisp) */
-    --background: 220 30% 98%;
-    --foreground: 224 30% 10%;
+    /* Premium Light Mode - Warm & Professional */
+    --background: 0 0% 99%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 224 30% 10%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 224 30% 10%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 243 75% 59%;
-    /* Indigo - Main Brand */
-    --primary-foreground: 210 40% 98%;
+    --primary: 221 83% 53%;
+    /* Vibrant Blue */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 190 90% 50%;
-    /* Cyan - Highlights */
-    --secondary-foreground: 224 30% 10%;
+    --secondary: 210 40% 96%;
+    /* Soft Gray-Blue */
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 220 20% 90%;
-    --muted-foreground: 220 20% 40%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 262 83% 58%;
-    /* Purple - Creative */
-    --accent-foreground: 210 40% 98%;
+    --accent: 262 80% 55%;
+    /* Purple */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 90%;
-    --input: 220 20% 90%;
-    --ring: 243 75% 59%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 220 30% 96%;
-    --sidebar-foreground: 224 30% 15%;
-    --sidebar-primary: 243 75% 59%;
+    /* Chart colors for light mode */
+    --chart-1: 221 83% 53%;
+    --chart-2: 262 80% 55%;
+    --chart-3: 142 71% 45%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 0 72% 51%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 190 90% 50%;
-    --sidebar-accent-foreground: 224 30% 10%;
-    --sidebar-border: 220 20% 85%;
-    --sidebar-ring: 243 75% 59%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 221 83% 53%;
   }
 
   .dark {
