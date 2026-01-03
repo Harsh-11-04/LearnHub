@@ -109,15 +109,18 @@ export const followService = {
 
                 if (error) throw error;
 
-                return (data || []).map(f => ({
-                    id: f.follower.id,
-                    name: f.follower.name,
-                    avatar: f.follower.avatar_url,
-                    role: f.follower.role,
-                    resourceCount: 0,
-                    followerCount: 0,
-                    followingCount: 0
-                }));
+                return (data || []).map((f: any) => {
+                    const follower = f.follower;
+                    return {
+                        id: follower?.id || '',
+                        name: follower?.name || '',
+                        avatar: follower?.avatar_url,
+                        role: follower?.role || 'student',
+                        resourceCount: 0,
+                        followerCount: 0,
+                        followingCount: 0
+                    };
+                });
             } catch (err) {
                 console.error('Error getting followers:', err);
                 return [];
@@ -142,15 +145,18 @@ export const followService = {
 
                 if (error) throw error;
 
-                return (data || []).map(f => ({
-                    id: f.following.id,
-                    name: f.following.name,
-                    avatar: f.following.avatar_url,
-                    role: f.following.role,
-                    resourceCount: 0,
-                    followerCount: 0,
-                    followingCount: 0
-                }));
+                return (data || []).map((f: any) => {
+                    const following = f.following;
+                    return {
+                        id: following?.id || '',
+                        name: following?.name || '',
+                        avatar: following?.avatar_url,
+                        role: following?.role || 'student',
+                        resourceCount: 0,
+                        followerCount: 0,
+                        followingCount: 0
+                    };
+                });
             } catch (err) {
                 console.error('Error getting following:', err);
                 return [];

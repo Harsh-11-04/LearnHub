@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useAppContext } from '@/contexts/AppContext';
+import { gamificationService, Badge as BadgeType } from '@/services/gamification.service';
+import { followService } from '@/services/follow.service';
 import {
   Edit,
   MapPin,
@@ -17,12 +19,19 @@ import {
   Users,
   MessageCircle,
   Star,
-  Settings
+  Settings,
+  Trophy,
+  Zap,
+  Award
 } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
   const { user, setUser } = useAppContext();
   const [isEditing, setIsEditing] = useState(false);
+  const [userBadges, setUserBadges] = useState<BadgeType[]>([]);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [userPoints, setUserPoints] = useState({ points: 0, level: 1 });
   const [editForm, setEditForm] = useState({
     name: user?.name || 'Harsh Pawar',
     bio: 'Full-stack developer passionate about React, Node.js, and open-source. Always learning new technologies and building cool stuff!',
@@ -32,11 +41,31 @@ const ProfilePage: React.FC = () => {
     linkedin: 'harsh-pawar'
   });
 
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (user) {
+        const [badges, followers, following, stats] = await Promise.all([
+          gamificationService.getUserBadges(user.id),
+          followService.getFollowerCount(user.id),
+          followService.getFollowingCount(user.id),
+          gamificationService.getUserStats(user.id)
+        ]);
+        setUserBadges(badges);
+        setFollowerCount(followers);
+        setFollowingCount(following);
+        if (stats) {
+          setUserPoints({ points: stats.points, level: stats.level });
+        }
+      }
+    };
+    loadUserData();
+  }, [user]);
+
   const stats = [
-    { label: 'Posts', value: '42', icon: Code2 },
-    { label: 'Study Groups', value: '3', icon: Users },
-    { label: 'Messages', value: '128', icon: MessageCircle },
-    { label: 'Stars', value: '256', icon: Star }
+    { label: 'Points', value: userPoints.points.toString(), icon: Zap },
+    { label: 'Level', value: userPoints.level.toString(), icon: Trophy },
+    { label: 'Followers', value: followerCount.toString(), icon: Users },
+    { label: 'Badges', value: userBadges.length.toString(), icon: Award }
   ];
 
   const posts = [
