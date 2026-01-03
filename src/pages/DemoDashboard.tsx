@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ContributionGraph } from '@/components/ContributionGraph';
 import { LiveStudyRooms } from '@/components/LiveStudyRooms';
 import { PriorityStack } from '@/components/PriorityStack';
-import { Leaderboard } from '@/components/Leaderboard';
+import Leaderboard from '@/components/Leaderboard';
 import { Sparkles, TrendingUp, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
