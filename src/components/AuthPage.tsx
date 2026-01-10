@@ -51,15 +51,16 @@ const AuthPage: React.FC = () => {
         console.log('✅ Login successful');
         navigate('/dashboard');
       }
-    } catch (err: any) {
-      console.error('Auth error:', err);
+    } catch (err: unknown) {
+      const error = err as Error;
+      console.error('Auth error:', error);
 
       // Check if it's the email confirmation error we throw
-      if (err.message?.includes('check your email')) {
+      if (error.message?.includes('check your email')) {
         alert('✅ Account created! Please check your email to confirm your account before logging in.');
       } else {
         // Show the actual error message from Supabase
-        const errorMessage = err.message || 'Authentication failed. Please check your credentials.';
+        const errorMessage = error.message || 'Authentication failed. Please check your credentials.';
         alert(`❌ ${errorMessage}`);
       }
     }

@@ -62,7 +62,7 @@ export const LeaderboardComponent = () => {
                     <TrendingUp className="h-5 w-5 text-purple-500" />
                     Leaderboard
                 </h2>
-                <Tabs value={timeFrame} onValueChange={(v) => setTimeFrame(v as any)}>
+                <Tabs value={timeFrame} onValueChange={(v) => setTimeFrame(v as 'all' | 'month' | 'week')}>
                     <TabsList>
                         <TabsTrigger value="week">Week</TabsTrigger>
                         <TabsTrigger value="month">Month</TabsTrigger>

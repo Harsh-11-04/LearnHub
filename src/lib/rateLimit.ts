@@ -112,13 +112,13 @@ export const uploadRateLimiter = new RateLimiter({
  */
 export function rateLimit(limiter: RateLimiter, key: string) {
     return function (
-        target: any,
-        propertyKey: string,
+        _target: unknown,
+        _propertyKey: string,
         descriptor: PropertyDescriptor
     ) {
         const originalMethod = descriptor.value;
 
-        descriptor.value = async function (...args: any[]) {
+        descriptor.value = async function (...args: unknown[]) {
             if (!limiter.checkLimit(key)) {
                 const resetTime = limiter.getResetTime(key);
                 const waitTime = resetTime ? Math.ceil((resetTime - Date.now()) / 1000) : 0;

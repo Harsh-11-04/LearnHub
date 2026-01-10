@@ -12,8 +12,17 @@ const generateNodes = (count: number) => {
     }));
 };
 
+interface Node {
+    id: number;
+    x: number;
+    y: number;
+    size: number;
+    duration: number;
+    delay: number;
+}
+
 const HeroAnimation = () => {
-    const [nodes, setNodes] = useState<any[]>([]);
+    const [nodes, setNodes] = useState<Node[]>([]);
 
     useEffect(() => {
         setNodes(generateNodes(15));

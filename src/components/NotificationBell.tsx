@@ -49,6 +49,7 @@ export const NotificationBell = () => {
         // Refresh every 30 seconds
         const interval = setInterval(loadNotifications, 30000);
         return () => clearInterval(interval);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     const handleMarkAsRead = async (id: string) => {

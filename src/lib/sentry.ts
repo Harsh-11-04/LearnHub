@@ -69,7 +69,7 @@ export const initSentry = () => {
 /**
  * Manually capture an exception
  */
-export const captureException = (error: Error, context?: Record<string, any>) => {
+export const captureException = (error: Error, context?: Record<string, unknown>) => {
     if (context) {
         Sentry.setContext('additional', context);
     }

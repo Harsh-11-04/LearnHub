@@ -9,7 +9,7 @@ type ThemeProviderProps = {
   children: React.ReactNode
   defaultTheme?: Theme
   storageKey?: string
-  value?: any
+  value?: ThemeContextType
 } & React.ComponentProps<"div">
 
 type ThemeContextType = {
@@ -24,7 +24,7 @@ export function ThemeProvider({
   defaultTheme = "system",
   value: _value,
   ...props
-}: any) {
+}: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== "undefined") {
       const savedTheme = localStorage.getItem("theme")

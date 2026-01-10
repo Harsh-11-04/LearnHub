@@ -324,6 +324,7 @@ const LiveDataTable = () => {
 const FeedPage: React.FC = () => {
   const { user } = useAppContext();
   const [newPost, setNewPost] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
