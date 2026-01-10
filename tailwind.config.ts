@@ -67,7 +67,7 @@ export default {
       },
       fontFamily: {
         mono: ['JetBrains Mono', 'monospace'],
-        sans: ['Outfit', 'Inter', 'sans-serif'], // Updated to Outfit for a more modern look
+        sans: ['Space Grotesk', 'Inter', 'sans-serif'], // Tech-focused professional font
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -112,7 +112,7 @@ export default {
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'hero-glow': 'conic-gradient(from 180deg at 50% 50%, #2a8af6 0deg, #a853ba 180deg, #e92a67 360deg)',
+        'hero-glow': 'conic-gradient(from 180deg at 50% 50%, #ec4899 0deg, #f472b6 180deg, #db2777 360deg)',
       }
     }
   },

@@ -1,18 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-const generateNodes = (count: number) => {
-    return Array.from({ length: count }).map((_, i) => ({
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: Math.random() * 10 + 5,
-        duration: Math.random() * 20 + 10,
-        delay: Math.random() * 5,
-    }));
-};
-
-interface Node {
+interface DataPoint {
     id: number;
     x: number;
     y: number;
@@ -21,95 +10,105 @@ interface Node {
     delay: number;
 }
 
+const generateDataPoints = (count: number): DataPoint[] => {
+    return Array.from({ length: count }).map((_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: Math.random() * 4 + 2,
+        duration: Math.random() * 15 + 8,
+        delay: Math.random() * 3,
+    }));
+};
+
 const HeroAnimation = () => {
-    const [nodes, setNodes] = useState<Node[]>([]);
+    const [dataPoints, setDataPoints] = useState<DataPoint[]>([]);
 
     useEffect(() => {
-        setNodes(generateNodes(15));
+        setDataPoints(generateDataPoints(20));
     }, []);
 
     return (
         <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-            {/* Background Gradient Blurs */}
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-400/20 rounded-full blur-3xl mix-blend-multiply filter opacity-50 animate-blob" />
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl mix-blend-multiply filter opacity-50 animate-blob animation-delay-2000" />
-            <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-pink-400/20 rounded-full blur-3xl mix-blend-multiply filter opacity-50 animate-blob animation-delay-4000" />
+            {/* Subtle pink glow accents - NOT cosmic blobs */}
+            <div className="absolute top-20 left-1/4 w-64 h-64 bg-pink-500/10 dark:bg-pink-500/20 rounded-full blur-3xl" />
+            <div className="absolute bottom-20 right-1/4 w-48 h-48 bg-pink-400/8 dark:bg-pink-400/15 rounded-full blur-3xl" />
 
-            {/* Neural Network SVG Overlay */}
-            <svg className="absolute inset-0 w-full h-full opacity-30">
+            {/* Circuit grid SVG */}
+            <svg className="absolute inset-0 w-full h-full opacity-20 dark:opacity-40">
                 <defs>
-                    <linearGradient id="grid-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#06b6d4" stopOpacity="0" />
-                        <stop offset="50%" stopColor="#06b6d4" stopOpacity="0.5" />
+                    <linearGradient id="circuit-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#ec4899" stopOpacity="0" />
+                        <stop offset="50%" stopColor="#ec4899" stopOpacity="0.6" />
                         <stop offset="100%" stopColor="#ec4899" stopOpacity="0" />
                     </linearGradient>
+                    <pattern id="circuit-pattern" width="80" height="80" patternUnits="userSpaceOnUse">
+                        <path
+                            d="M 0 40 L 30 40 L 40 30 L 40 0 M 40 80 L 40 50 L 50 40 L 80 40"
+                            stroke="currentColor"
+                            strokeWidth="0.5"
+                            fill="none"
+                            opacity="0.3"
+                        />
+                        <circle cx="40" cy="40" r="2" fill="#ec4899" opacity="0.4" />
+                    </pattern>
                 </defs>
+                <rect width="100%" height="100%" fill="url(#circuit-pattern)" />
 
-                {/* Dynamic Connections */}
-                {nodes.map((node, i) => (
-                    nodes.map((target, j) => {
-                        // Only connect some nodes to avoid clutter
-                        if (i < j && Math.abs(node.x - target.x) < 20 && Math.abs(node.y - target.y) < 20) {
-                            return (
-                                <motion.line
-                                    key={`${i}-${j}`}
-                                    x1={`${node.x}%`}
-                                    y1={`${node.y}%`}
-                                    x2={`${target.x}%`}
-                                    y2={`${target.y}%`}
-                                    stroke="url(#grid-grad)"
-                                    strokeWidth="1"
-                                    initial={{ pathLength: 0, opacity: 0 }}
-                                    animate={{
-                                        pathLength: [0, 1, 1],
-                                        opacity: [0, 0.4, 0],
-                                        x1: [`${node.x}%`, `${node.x + (Math.random() * 5 - 2.5)}%`],
-                                        y1: [`${node.y}%`, `${node.y + (Math.random() * 5 - 2.5)}%`],
-                                    }}
-                                    transition={{
-                                        duration: Math.random() * 5 + 5,
-                                        repeat: Infinity,
-                                        repeatType: "reverse",
-                                        ease: "easeInOut"
-                                    }}
-                                />
-                            )
-                        }
-                        return null;
-                    })
+                {/* Animated data flow lines */}
+                {dataPoints.slice(0, 5).map((point, i) => (
+                    <motion.line
+                        key={`line-${i}`}
+                        x1={`${point.x}%`}
+                        y1={`${point.y}%`}
+                        x2={`${(point.x + 20) % 100}%`}
+                        y2={`${(point.y + 15) % 100}%`}
+                        stroke="url(#circuit-grad)"
+                        strokeWidth="1"
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{
+                            pathLength: [0, 1, 1],
+                            opacity: [0, 0.5, 0],
+                        }}
+                        transition={{
+                            duration: point.duration / 2,
+                            repeat: Infinity,
+                            delay: point.delay,
+                            ease: "easeInOut"
+                        }}
+                    />
                 ))}
             </svg>
 
-            {/* Floating Nodes */}
-            {nodes.map((node) => (
+            {/* Floating data particles */}
+            {dataPoints.map((point) => (
                 <motion.div
-                    key={node.id}
-                    className="absolute rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-cyan-500/50"
+                    key={point.id}
+                    className="absolute rounded-full bg-pink-500 dark:bg-pink-400"
                     style={{
-                        left: `${node.x}%`,
-                        top: `${node.y}%`,
-                        width: node.size,
-                        height: node.size,
+                        left: `${point.x}%`,
+                        top: `${point.y}%`,
+                        width: point.size,
+                        height: point.size,
                     }}
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{
-                        y: [0, -100, 0],
-                        x: [0, Math.random() * 50 - 25, 0],
-                        opacity: [0, 0.8, 0],
+                        y: [0, -30, 0],
+                        opacity: [0, 0.6, 0],
                         scale: [0, 1, 0],
                     }}
                     transition={{
-                        duration: node.duration,
+                        duration: point.duration,
                         repeat: Infinity,
-                        delay: node.delay,
+                        delay: point.delay,
                         ease: "easeInOut",
                     }}
                 />
             ))}
 
-            {/* Grid Pattern Overlay */}
+            {/* Subtle grid dots */}
             <div
-                className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+                className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04]"
                 style={{
                     backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
                     backgroundSize: '40px 40px'
