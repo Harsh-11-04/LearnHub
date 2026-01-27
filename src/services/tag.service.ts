@@ -136,12 +136,17 @@ export const tagService = {
 
                 if (error) throw error;
 
-                return (data || []).map(rt => ({
-                    id: rt.tags.id,
-                    name: rt.tags.name,
-                    slug: rt.tags.slug,
-                    usageCount: rt.tags.usage_count
-                }));
+                return (data || [])
+                    .filter(rt => rt.tags && !Array.isArray(rt.tags))
+                    .map(rt => {
+                        const tag = rt.tags as unknown as { id: string; name: string; slug: string; usage_count: number };
+                        return {
+                            id: tag.id,
+                            name: tag.name,
+                            slug: tag.slug,
+                            usageCount: tag.usage_count
+                        };
+                    });
             } catch (err) {
                 console.error('Error fetching resource tags:', err);
                 return [];

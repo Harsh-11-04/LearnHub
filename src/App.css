@@ -1,8 +1,6 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  min-height: 100vh;
 }
 
 /* =========================
@@ -16,19 +14,20 @@
   transition: filter 300ms ease;
 }
 
-/* Blue learning-theme glow */
+/* Pink learning-theme glow */
 .logo:hover {
-  filter: drop-shadow(0 0 2em rgba(59, 130, 246, 0.6));
+  filter: drop-shadow(0 0 2em rgba(236, 72, 153, 0.6));
 }
 
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em rgba(59, 130, 246, 0.6));
+  filter: drop-shadow(0 0 2em rgba(236, 72, 153, 0.6));
 }
 
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -46,15 +45,15 @@
 
 .card {
   padding: 1.75em;
-  border-radius: 0.75rem;
-  border: 1px solid rgba(59, 130, 246, 0.15);
-  background-color: rgba(59, 130, 246, 0.03);
+  border-radius: 0.625rem;
+  border: 1px solid rgba(236, 72, 153, 0.15);
+  background-color: rgba(236, 72, 153, 0.03);
   transition: all 0.25s ease;
 }
 
 .card:hover {
-  border-color: rgba(59, 130, 246, 0.35);
-  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.12);
+  border-color: rgba(236, 72, 153, 0.35);
+  box-shadow: 0 6px 18px rgba(236, 72, 153, 0.12);
 }
 
 /* =========================
@@ -66,13 +65,9 @@ body {
 }
 
 h1,
- h2,
- h3 {
+h2,
+h3 {
   letter-spacing: -0.02em;
-}
-
-p {
-  color: rgba(100, 116, 139, 1); /* slate */
 }
 
 .read-the-docs {
@@ -85,8 +80,8 @@ p {
 
 .learning-badge {
   display: inline-block;
-  background-color: rgba(59, 130, 246, 0.1);
-  color: rgb(59, 130, 246);
+  background-color: rgba(236, 72, 153, 0.1);
+  color: rgb(236, 72, 153);
   padding: 0.25rem 0.6rem;
   border-radius: 999px;
   font-size: 0.75rem;
@@ -95,6 +90,6 @@ p {
 
 /* Optional: subtle focus ring for accessibility */
 :focus-visible {
-  outline: 2px solid rgba(59, 130, 246, 0.6);
+  outline: 2px solid rgba(236, 72, 153, 0.6);
   outline-offset: 2px;
 }

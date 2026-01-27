@@ -8,18 +8,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useAppContext } from '@/contexts/AppContext';
-import { 
-  Users, 
-  Plus, 
-  Search, 
-  Github, 
+import {
+  Users,
+  Plus,
+  Search,
+  Github,
   Star,
-  Calendar,
   MessageCircle,
   Code2
 } from 'lucide-react';
 
-interface Study Group {
+interface StudyGroup {
   id: string;
   name: string;
   description: string;
@@ -38,18 +37,18 @@ interface Study Group {
   };
 }
 
-const Study GroupsPage: React.FC = () => {
+const StudyGroupsPage: React.FC = () => {
   const { user } = useAppContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [newStudy Group, setNewStudy Group] = useState({
+  const [newStudyGroup, setNewStudyGroup] = useState({
     name: '',
     description: '',
     techStack: '',
     project: ''
   });
 
-  const [Study Groups, setStudy Groups] = useState<Study Group[]>([
+  const [studyGroups, setStudyGroups] = useState<StudyGroup[]>([
     {
       id: '1',
       name: 'React UI Library',
@@ -60,7 +59,7 @@ const Study GroupsPage: React.FC = () => {
       isJoined: true,
       project: {
         name: 'ui-components',
-        repo: 'github.com/Study Group/ui-components',
+        repo: 'github.com/studygroup/ui-components',
         stars: 128
       },
       leader: {
@@ -78,7 +77,7 @@ const Study GroupsPage: React.FC = () => {
       isJoined: false,
       project: {
         name: 'smart-chatbot',
-        repo: 'github.com/Study Group/smart-chatbot',
+        repo: 'github.com/studygroup/smart-chatbot',
         stars: 89
       },
       leader: {
@@ -96,7 +95,7 @@ const Study GroupsPage: React.FC = () => {
       isJoined: false,
       project: {
         name: 'devops-toolkit',
-        repo: 'github.com/Study Group/devops-toolkit',
+        repo: 'github.com/studygroup/devops-toolkit',
         stars: 45
       },
       leader: {
@@ -106,28 +105,28 @@ const Study GroupsPage: React.FC = () => {
     }
   ]);
 
-  const handleJoinStudy Group = (Study GroupId: string) => {
-    setStudy Groups(Study Groups.map(Study Group => 
-      Study Group.id === Study GroupId 
-        ? { ...Study Group, isJoined: !Study Group.isJoined, members: Study Group.isJoined ? Study Group.members - 1 : Study Group.members + 1 }
-        : Study Group
+  const handleJoinStudyGroup = (studyGroupId: string) => {
+    setStudyGroups(studyGroups.map(group =>
+      group.id === studyGroupId
+        ? { ...group, isJoined: !group.isJoined, members: group.isJoined ? group.members - 1 : group.members + 1 }
+        : group
     ));
   };
 
-  const handleCreateStudy Group = () => {
-    if (!newStudy Group.name || !newStudy Group.description) return;
+  const handleCreateStudyGroup = () => {
+    if (!newStudyGroup.name || !newStudyGroup.description) return;
 
-    const Study Group: Study Group = {
+    const group: StudyGroup = {
       id: Date.now().toString(),
-      name: newStudy Group.name,
-      description: newStudy Group.description,
-      techStack: newStudy Group.techStack.split(',').map(t => t.trim()).filter(t => t),
+      name: newStudyGroup.name,
+      description: newStudyGroup.description,
+      techStack: newStudyGroup.techStack.split(',').map(t => t.trim()).filter(t => t),
       members: 1,
       maxMembers: 6,
       isJoined: true,
       project: {
-        name: newStudy Group.project || newStudy Group.name.toLowerCase().replace(/\s+/g, '-'),
-        repo: `github.com/${user?.name.toLowerCase()}/project`,
+        name: newStudyGroup.project || newStudyGroup.name.toLowerCase().replace(/\s+/g, '-'),
+        repo: `github.com/${user?.name?.toLowerCase() || 'user'}/project`,
         stars: 0
       },
       leader: {
@@ -136,15 +135,15 @@ const Study GroupsPage: React.FC = () => {
       }
     };
 
-    setStudy Groups([Study Group, ...Study Groups]);
-    setNewStudy Group({ name: '', description: '', techStack: '', project: '' });
+    setStudyGroups([group, ...studyGroups]);
+    setNewStudyGroup({ name: '', description: '', techStack: '', project: '' });
     setShowCreateDialog(false);
   };
 
-  const filteredStudy Groups = Study Groups.filter(Study Group =>
-    Study Group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    Study Group.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    Study Group.techStack.some(tech => tech.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredStudyGroups = studyGroups.filter(group =>
+    group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    group.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    group.techStack.some(tech => tech.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -153,9 +152,9 @@ const Study GroupsPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Dev Study Groups</h1>
-          <p className="text-muted-foreground">Join or create Study Groups to collaborate on open-source projects</p>
+          <p className="text-muted-foreground">Join or create study groups to collaborate on open-source projects</p>
         </div>
-        
+
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
             <Button className="gap-2">
@@ -169,29 +168,29 @@ const Study GroupsPage: React.FC = () => {
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="Study Group-name">Study Group Name</Label>
+                <Label htmlFor="studygroup-name">Study Group Name</Label>
                 <Input
-                  id="Study Group-name"
-                  value={newStudy Group.name}
-                  onChange={(e) => setNewStudy Group({ ...newStudy Group, name: e.target.value })}
+                  id="studygroup-name"
+                  value={newStudyGroup.name}
+                  onChange={(e) => setNewStudyGroup({ ...newStudyGroup, name: e.target.value })}
                   placeholder="React UI Library"
                 />
               </div>
               <div>
-                <Label htmlFor="Study Group-description">Description</Label>
+                <Label htmlFor="studygroup-description">Description</Label>
                 <Textarea
-                  id="Study Group-description"
-                  value={newStudy Group.description}
-                  onChange={(e) => setNewStudy Group({ ...newStudy Group, description: e.target.value })}
-                  placeholder="What will your Study Group work on?"
+                  id="studygroup-description"
+                  value={newStudyGroup.description}
+                  onChange={(e) => setNewStudyGroup({ ...newStudyGroup, description: e.target.value })}
+                  placeholder="What will your study group work on?"
                 />
               </div>
               <div>
                 <Label htmlFor="tech-stack">Tech Stack (comma separated)</Label>
                 <Input
                   id="tech-stack"
-                  value={newStudy Group.techStack}
-                  onChange={(e) => setNewStudy Group({ ...newStudy Group, techStack: e.target.value })}
+                  value={newStudyGroup.techStack}
+                  onChange={(e) => setNewStudyGroup({ ...newStudyGroup, techStack: e.target.value })}
                   placeholder="React, TypeScript, Node.js"
                 />
               </div>
@@ -199,13 +198,13 @@ const Study GroupsPage: React.FC = () => {
                 <Label htmlFor="project-name">Project Name (optional)</Label>
                 <Input
                   id="project-name"
-                  value={newStudy Group.project}
-                  onChange={(e) => setNewStudy Group({ ...newStudy Group, project: e.target.value })}
+                  value={newStudyGroup.project}
+                  onChange={(e) => setNewStudyGroup({ ...newStudyGroup, project: e.target.value })}
                   placeholder="my-awesome-project"
                 />
               </div>
               <div className="flex gap-2 pt-4">
-                <Button onClick={handleCreateStudy Group} className="flex-1">
+                <Button onClick={handleCreateStudyGroup} className="flex-1">
                   Create Study Group
                 </Button>
                 <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
@@ -221,7 +220,7 @@ const Study GroupsPage: React.FC = () => {
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search Study Groups by name, description, or tech..."
+          placeholder="Search study groups by name, description, or tech..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9"
@@ -230,62 +229,62 @@ const Study GroupsPage: React.FC = () => {
 
       {/* Study Groups Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredStudy Groups.map((Study Group) => (
-          <Card key={Study Group.id} className="hover:shadow-lg transition-shadow border-slate-700/50 hover:border-cyan-500/50 bg-slate-800/30 backdrop-blur">
+        {filteredStudyGroups.map((group) => (
+          <Card key={group.id} className="hover:shadow-lg transition-shadow border-slate-700/50 hover:border-cyan-500/50 bg-slate-800/30 backdrop-blur">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <CardTitle className="text-lg mb-2">{Study Group.name}</CardTitle>
+                  <CardTitle className="text-lg mb-2">{group.name}</CardTitle>
                   <p className="text-sm text-muted-foreground line-clamp-2">
-                    {Study Group.description}
+                    {group.description}
                   </p>
                 </div>
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={Study Group.leader.avatar} />
-                  <AvatarFallback>{Study Group.leader.name.charAt(0)}</AvatarFallback>
+                  <AvatarImage src={group.leader.avatar} />
+                  <AvatarFallback>{group.leader.name.charAt(0)}</AvatarFallback>
                 </Avatar>
               </div>
             </CardHeader>
-            
+
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-1">
-                {Study Group.techStack.map((tech) => (
+                {group.techStack.map((tech) => (
                   <Badge key={tech} variant="secondary" className="text-xs">
                     {tech}
                   </Badge>
                 ))}
               </div>
-              
+
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <Github className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground truncate">{Study Group.project.repo}</span>
+                  <span className="text-muted-foreground truncate">{group.project.repo}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4 text-muted-foreground" />
-                      <span>{Study Group.members}/{Study Group.maxMembers}</span>
+                      <span>{group.members}/{group.maxMembers}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 text-muted-foreground" />
-                      <span>{Study Group.project.stars}</span>
+                      <span>{group.project.stars}</span>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex gap-2">
                 <Button
-                  variant={Study Group.isJoined ? "outline" : "default"}
+                  variant={group.isJoined ? "outline" : "default"}
                   size="sm"
-                  onClick={() => handleJoinStudy Group(Study Group.id)}
+                  onClick={() => handleJoinStudyGroup(group.id)}
                   className="flex-1"
-                  disabled={!Study Group.isJoined && Study Group.members >= Study Group.maxMembers}
+                  disabled={!group.isJoined && group.members >= group.maxMembers}
                 >
-                  {Study Group.isJoined ? 'Leave' : Study Group.members >= Study Group.maxMembers ? 'Full' : 'Join'}
+                  {group.isJoined ? 'Leave' : group.members >= group.maxMembers ? 'Full' : 'Join'}
                 </Button>
-                {Study Group.isJoined && (
+                {group.isJoined && (
                   <Button variant="ghost" size="sm">
                     <MessageCircle className="h-4 w-4" />
                   </Button>
@@ -296,15 +295,15 @@ const Study GroupsPage: React.FC = () => {
         ))}
       </div>
 
-      {filteredStudy Groups.length === 0 && (
+      {filteredStudyGroups.length === 0 && (
         <div className="text-center py-12">
           <Code2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">No Study Groups found</h3>
-          <p className="text-muted-foreground">Try adjusting your search or create a new Study Group</p>
+          <p className="text-muted-foreground">Try adjusting your search or create a new study group</p>
         </div>
       )}
     </div>
   );
 };
 
-export default Study GroupsPage;
+export default StudyGroupsPage;

@@ -90,26 +90,15 @@ export const LeaderboardComponent = () => {
                         </Avatar>
 
                         <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                                <span className="font-medium truncate">{entry.name}</span>
-                                <Badge variant="outline" className="text-xs">
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-medium truncate max-w-[120px]">{entry.name}</span>
+                                <Badge variant="outline" className="text-xs shrink-0">
                                     Lvl {entry.level}
                                 </Badge>
                             </div>
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                <span className="flex items-center gap-1">
-                                    <FileText className="h-3 w-3" /> {entry.resourceCount} resources
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <Download className="h-3 w-3" /> {entry.totalDownloads} downloads
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <Award className="h-3 w-3" /> {entry.badgeCount} badges
-                                </span>
-                            </div>
                         </div>
 
-                        <div className="text-right">
+                        <div className="text-right shrink-0">
                             <div className="font-bold text-lg">{entry.points.toLocaleString()}</div>
                             <div className="text-xs text-muted-foreground">points</div>
                         </div>

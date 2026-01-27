@@ -193,7 +193,7 @@ const Assignments = () => {
                         key={f}
                         variant={filter === f ? 'default' : 'outline'}
                         size="sm"
-                        onClick={() => setFilter(f as any)}
+                        onClick={() => setFilter(f as 'all' | 'pending' | 'submitted' | 'graded')}
                         className="capitalize"
                     >
                         {f}
